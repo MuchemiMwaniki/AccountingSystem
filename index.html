@@ -16,9 +16,9 @@
             </div>
             <nav class="sidebar-nav">
                 <ul>
-                    <li><a href="#" class="nav-item active"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
-                    <li><a href="#" class="nav-item"><i class="fas fa-file-invoice"></i> Invoices</a></li>
-                    <li><a href="#" class="nav-item"><i class="fas fa-shopping-cart"></i> Purchases</a></li>
+                    <li><a href="index.html" class="nav-item active"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                    <li><a href="invoice-form.html" class="nav-item"><i class="fas fa-file-invoice"></i> Invoices</a></li>
+                    <li><a href="purchase-form.html" class="nav-item"><i class="fas fa-shopping-cart"></i> Purchases</a></li>
                     <li><a href="#" class="nav-item"><i class="fas fa-exchange-alt"></i> Transactions</a></li>
                     <li><a href="#" class="nav-item"><i class="fas fa-chart-line"></i> Reports</a></li>
                     <li><a href="#" class="nav-item"><i class="fas fa-university"></i> Bank Reconciliation</a></li>
@@ -34,8 +34,17 @@
             <header class="main-header">
                 <h1 class="page-title">Dashboard Overview</h1>
                 <div class="header-actions">
-                    <button class="header-btn primary-accent-btn"><i class="fas fa-plus"></i> New Invoice</button>
-                    <button class="header-btn secondary-btn"><i class="fas fa-plus"></i> New Purchase</button>
+                    <div class="currency-selector">
+                        <label for="currency">Currency:</label>
+                        <select id="currency">
+                            <option value="KES">KES - Kenyan Shilling</option>
+                            <option value="USD">USD - US Dollar</option>
+                            <option value="EUR">EUR - Euro</option>
+                            <option value="GBP">GBP - British Pound</option>
+                        </select>
+                    </div>
+                    <button class="header-btn primary-accent-btn" onclick="location.href='invoice-form.html'"><i class="fas fa-plus"></i> New Invoice</button>
+                    <button class="header-btn secondary-btn" onclick="location.href='purchase-form.html'"><i class="fas fa-plus"></i> New Purchase</button>
                     <div class="user-profile">
                         <img src="Model.jfif" alt="User Avatar" class="user-avatar">
                         <span>John Doe</span>
@@ -133,19 +142,4 @@
             </section>
 
             <section class="financial-summary">
-                <h2>Financial Overview (Placeholder)</h2>
-                <div class="card">
-                    <p>This section would display charts (e.g., Income vs. Expenses over time) or key financial ratios. (Backend integration required for actual data visualization).</p>
-                    <div class="placeholder-chart">
-                        <i class="fas fa-chart-area"></i>
-                        <p>Graph/Chart Placeholder</p>
-                    </div>
-                </div>
-            </section>
-
-        </main>
-    </div>
-
-    <script src="accounting-script.js"></script>
-</body>
-</html>
+                <h2>Financial Overview
