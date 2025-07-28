@@ -1,12 +1,28 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Dynamic Year in Footer
+    const BASE_URL = 'http://127.0.0.1:5000/api'; // Your Flask backend URL
+
+    // --- Authentication Check (Apply to all pages except auth.html) ---
+    const currentPage = window.location.pathname.split('/').pop();
+    if (currentPage !== 'auth.html') {
+        const authToken = localStorage.getItem('authToken');
+        if (!authToken) {
+            window.location.href = 'auth.html'; // Redirect to login if not authenticated
+            return; // Stop further script execution
+        }
+        // Display username in header
+        const usernameDisplay = document.querySelector('.user-profile span');
+        if (usernameDisplay) {
+            usernameDisplay.textContent = localStorage.getItem('username') || 'User';
+        }
+    }
+
+    // --- Dynamic Year in Footer ---
     const currentYearSpan = document.getElementById('current-year');
     if (currentYearSpan) {
         currentYearSpan.textContent = new Date().getFullYear();
     }
 
     // --- Common Form Logic (for both invoice and purchase forms) ---
-    // Set current date for date inputs
     const dateInputs = document.querySelectorAll('input[type="date"]');
     dateInputs.forEach(input => {
         if (!input.value) {
@@ -25,12 +41,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const taxRateInput = document.getElementById('taxRate');
     const totalTaxSpan = document.getElementById('totalTax');
     const grandTotalSpan = document.getElementById('grandTotal');
-    const saveInvoiceBtn = document.getElementById('save-invoice-btn'); // New ID
+    const saveInvoiceBtn = document.getElementById('save-invoice-btn');
     const resetInvoiceBtn = document.getElementById('reset-invoice-btn');
     const customerSuggestionsDatalist = document.getElementById('customer-suggestions');
     const productSuggestionsDatalist = document.getElementById('product-suggestions');
 
-    // Mock Data for Suggestions (in a real app, this would come from a backend API)
+    // Mock Data for Suggestions (Ideally, these would come from backend APIs /api/customers, /api/products)
     const mockCustomers = [
         { name: 'ABC Auto Services', id: 'C001' },
         { name: 'Quick Fix Garage', id: 'C002' },
@@ -47,7 +63,6 @@ document.addEventListener('DOMContentLoaded', function() {
         { name: 'Air Filter', price: 800.00 }
     ];
 
-    // Function to populate datalists
     function populateDatalists() {
         if (customerSuggestionsDatalist) {
             mockCustomers.forEach(customer => {
@@ -65,13 +80,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Function to set due date (e.g., 30 days from invoice date)
     function setDueDate() {
         const invoiceDateInput = document.getElementById('invoiceDate');
         const dueDateInput = document.getElementById('dueDate');
         if (invoiceDateInput && dueDateInput && invoiceDateInput.value) {
             const invoiceDate = new Date(invoiceDateInput.value);
-            invoiceDate.setDate(invoiceDate.getDate() + 30); // Add 30 days for due date
+            invoiceDate.setDate(invoiceDate.getDate() + 30);
             const year = invoiceDate.getFullYear();
             const month = String(invoiceDate.getMonth() + 1).padStart(2, '0');
             const day = String(invoiceDate.getDate()).padStart(2, '0');
@@ -79,33 +93,28 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Function to initialize/reset invoice form
     function initializeInvoiceForm() {
-        if (!invoiceItemsContainer) return; // Only run if on invoice form page
+        if (!invoiceItemsContainer) return;
 
-        invoiceItemsContainer.innerHTML = ''; // Clear all existing rows
-        itemCounter = 0; // Reset counter
-        addInvoiceItemRow(); // Add one default empty row
+        invoiceItemsContainer.innerHTML = '';
+        itemCounter = 0;
+        addInvoiceItemRow();
 
-        // Reset summary fields
         if (subtotalSpan) subtotalSpan.textContent = '0.00';
         if (taxRateInput) taxRateInput.value = '0';
         if (totalTaxSpan) totalTaxSpan.textContent = '0.00';
         if (grandTotalSpan) grandTotalSpan.textContent = '0.00 KES';
 
-        // Set default dates
         const invoiceDateInput = document.getElementById('invoiceDate');
-        const dueDateInput = document.getElementById('dueDate');
         const today = new Date();
         const year = today.getFullYear();
         const month = String(today.getMonth() + 1).padStart(2, '0');
         const day = String(today.getDate()).padStart(2, '0');
         if (invoiceDateInput) invoiceDateInput.value = `${year}-${month}-${day}`;
-        setDueDate(); // Set due date based on invoice date
+        setDueDate();
     }
 
-    // --- Invoice Calculation & Item Management ---
-    let itemCounter = 0; // Global counter for unique item row IDs
+    let itemCounter = 0;
 
     function calculateTotals() {
         if (!invoiceItemsContainer) return;
@@ -119,11 +128,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const qty = parseFloat(qtyInput ? qtyInput.value : 0) || 0;
             let price = parseFloat(priceInput ? priceInput.value : 0) || 0;
 
-            // Auto-fill price if product is selected from mock data
             if (itemDescInput && productSuggestionsDatalist) {
                 const selectedProductName = itemDescInput.value;
                 const matchingProduct = mockProducts.find(p => p.name === selectedProductName);
-                if (matchingProduct && priceInput.value === '0.00' && selectedProductName) { // Only auto-fill if price is 0 and a product is selected
+                if (matchingProduct && priceInput.value === '0.00' && selectedProductName) {
                     price = matchingProduct.price;
                     priceInput.value = price.toFixed(2);
                 }
@@ -144,13 +152,11 @@ document.addEventListener('DOMContentLoaded', function() {
         if (subtotalSpan) subtotalSpan.textContent = subtotal.toFixed(2);
         if (totalTaxSpan) totalTaxSpan.textContent = totalTax.toFixed(2);
 
-        // Get currency from selector on dashboard or default for invoice form
-        const currencySelector = document.getElementById('currency'); // This is on index.html
+        const currencySelector = document.getElementById('currency');
         let displayCurrency = 'KES';
-        if (currencySelector) { // If on dashboard, use its currency
+        if (currencySelector) {
             displayCurrency = currencySelector.value;
         }
-        // else: use default 'KES' for invoice form
 
         if (grandTotalSpan) grandTotalSpan.textContent = grandTotal.toFixed(2) + ' ' + displayCurrency;
     }
@@ -180,29 +186,24 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
         invoiceItemsContainer.appendChild(newRow);
 
-        // Attach event listeners to new row's inputs
         newRow.querySelectorAll('input[type="number"]').forEach(input => {
             input.addEventListener('input', calculateTotals);
         });
-        // Attach listener for description change (for price autofill)
         newRow.querySelector('[id^="itemDesc-"]').addEventListener('change', calculateTotals);
 
-
-        // Attach event listener for remove button
         newRow.querySelector('.remove-item-btn').addEventListener('click', function() {
             newRow.remove();
-            calculateTotals(); // Recalculate after removing a row
+            calculateTotals();
         });
 
-        calculateTotals(); // Recalculate for the new row added
+        calculateTotals();
     }
 
-    // --- Form Submission / Data Handling ---
-    if (document.getElementById('invoice-form')) { // Only run if on invoice-form.html
+    // --- Invoice Form Submission / Data Handling (Backend Integration) ---
+    if (document.getElementById('invoice-form')) {
         populateDatalists();
         initializeInvoiceForm();
 
-        // Add event listeners for initial elements after initializeForm
         if (taxRateInput) {
             taxRateInput.addEventListener('input', calculateTotals);
         }
@@ -214,13 +215,11 @@ document.addEventListener('DOMContentLoaded', function() {
             invoiceDateInput.addEventListener('change', setDueDate);
         }
 
-        // Event listener for Save & View Invoice button
         if (saveInvoiceBtn) {
-            saveInvoiceBtn.addEventListener('click', function(event) {
-                event.preventDefault(); // Prevent default form submission
+            saveInvoiceBtn.addEventListener('click', async function(event) {
+                event.preventDefault();
 
                 const form = document.getElementById('invoice-form');
-                // Basic validation for invoice items
                 let isValid = true;
                 document.querySelectorAll('.item-row').forEach(row => {
                     const desc = row.querySelector('[id^="itemDesc-"]').value.trim();
@@ -235,43 +234,97 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
 
                 if (isValid) {
-                    // Collect all form data
-                    const invoiceData = {
-                        invoiceNumber: document.getElementById('invoiceNumber').value,
-                        invoiceDate: document.getElementById('invoiceDate').value,
-                        customer: document.getElementById('customer').value,
-                        dueDate: document.getElementById('dueDate').value,
-                        items: [],
-                        subtotal: subtotalSpan.textContent,
-                        taxRate: taxRateInput.value,
-                        totalTax: totalTaxSpan.textContent,
-                        grandTotal: grandTotalSpan.textContent
+                    const invoiceNumber = document.getElementById('invoiceNumber').value;
+                    const invoiceDate = document.getElementById('invoiceDate').value;
+                    const customerName = document.getElementById('customer').value;
+                    const grandTotal = parseFloat(grandTotalSpan.textContent.replace(' KES', ''));
+
+                    // --- IMPORTANT: Simplified Double-Entry for Invoice ---
+                    // For a full accounting system, you would typically have a dedicated
+                    // backend endpoint (e.g., POST /api/invoices) that handles the
+                    // complex double-entry (e.g., Debit Accounts Receivable, Credit Sales Revenue, Credit Sales Tax Payable).
+                    // Here, we're creating a single 'Sale' transaction.
+                    // You MUST ensure 'Accounts Receivable' and 'Sales Revenue' accounts exist in your backend database
+                    // and get their IDs. For this example, we'll use placeholder IDs (e.g., 1 and 2).
+                    // In a real app, you'd fetch account IDs dynamically or map via names.
+
+                    // Placeholder Account IDs (replace with actual IDs from your backend)
+                    // You would need to create these accounts via your backend's /api/accounts endpoint first.
+                    const ACCOUNTS_RECEIVABLE_ID = 1; // Example ID for an Asset account
+                    const SALES_REVENUE_ID = 2;       // Example ID for a Revenue account
+
+                    if (!ACCOUNTS_RECEIVABLE_ID || !SALES_REVENUE_ID) {
+                        alert('Error: Please ensure Accounts Receivable and Sales Revenue accounts are set up in your backend and their IDs are correctly configured in the frontend script.');
+                        return;
+                    }
+
+                    const authToken = localStorage.getItem('authToken');
+                    if (!authToken) {
+                        alert('You are not authenticated. Please log in.');
+                        window.location.href = 'auth.html';
+                        return;
+                    }
+
+                    const transactionData = {
+                        description: `Invoice #${invoiceNumber} for ${customerName}`,
+                        amount: grandTotal,
+                        debit_account_id: ACCOUNTS_RECEIVABLE_ID,
+                        credit_account_id: SALES_REVENUE_ID,
+                        transaction_type: 'Sale',
+                        date: invoiceDate // Use the invoice date for the transaction
                     };
 
-                    document.querySelectorAll('.item-row').forEach(row => {
-                        invoiceData.items.push({
-                            description: row.querySelector('[id^="itemDesc-"]').value,
-                            quantity: parseFloat(row.querySelector('[id^="itemQty-"]').value),
-                            unitPrice: parseFloat(row.querySelector('[id^="itemPrice-"]').value),
-                            total: parseFloat(row.querySelector('.item-calculated-total').textContent)
+                    try {
+                        const response = await fetch(`${BASE_URL}/transactions`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${authToken}`
+                            },
+                            body: JSON.stringify(transactionData)
                         });
-                    });
 
-                    // Save data to localStorage
-                    localStorage.setItem('currentInvoiceData', JSON.stringify(invoiceData));
+                        const data = await response.json();
 
-                    // In a real app, you would send this data to your backend here.
-                    // alert('Invoice data collected and saved locally! Now opening print preview.');
+                        if (response.ok) {
+                            alert('Invoice recorded successfully!');
+                            // Store data locally for invoice-display.html (temporary, should be backend-driven)
+                            const invoiceDataForDisplay = {
+                                invoiceNumber: invoiceNumber,
+                                invoiceDate: invoiceDate,
+                                customer: customerName,
+                                dueDate: document.getElementById('dueDate').value,
+                                items: [], // You'd need to fetch these from backend if not storing in localStorage
+                                subtotal: subtotalSpan.textContent,
+                                taxRate: taxRateInput.value,
+                                totalTax: totalTaxSpan.textContent,
+                                grandTotal: grandTotalSpan.textContent
+                            };
+                             document.querySelectorAll('.item-row').forEach(row => {
+                                invoiceDataForDisplay.items.push({
+                                    description: row.querySelector('[id^="itemDesc-"]').value,
+                                    quantity: parseFloat(row.querySelector('[id^="itemQty-"]').value),
+                                    unitPrice: parseFloat(row.querySelector('[id^="itemPrice-"]').value),
+                                    total: parseFloat(row.querySelector('.item-calculated-total').textContent)
+                                });
+                            });
+                            localStorage.setItem('currentInvoiceData', JSON.stringify(invoiceDataForDisplay));
 
-                    // Redirect to the invoice display page
-                    window.open('invoice-display.html', '_blank'); // Open in new tab
-                    form.reset(); // Optionally clear the form after viewing
-                    initializeInvoiceForm(); // Re-initialize for new invoice entry
+                            window.open('invoice-display.html', '_blank');
+                            form.reset();
+                            initializeInvoiceForm();
+                            // Ideally, you'd refresh dashboard data here if on dashboard
+                        } else {
+                            alert(`Failed to record invoice: ${data.message}`);
+                        }
+                    } catch (error) {
+                        alert('Network error while recording invoice. Please check your backend server.');
+                        console.error('Invoice recording error:', error);
+                    }
                 }
             });
         }
 
-        // Event listener for Reset button
         if (resetInvoiceBtn) {
             resetInvoiceBtn.addEventListener('click', function() {
                 if (confirm('Are you sure you want to reset the form? All unsaved changes will be lost.')) {
@@ -282,10 +335,175 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // --- Purchase Form Specific Logic (Backend Integration) ---
+    const purchaseForm = document.querySelector('form[action="#"]'); // Assuming the purchase form has no action
+    if (purchaseForm && window.location.pathname.includes('purchase-form.html')) {
+        purchaseForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const purchaseDate = document.getElementById('purchaseDate').value;
+            const vendor = document.getElementById('vendor').value;
+            const description = document.getElementById('description').value;
+            const category = document.getElementById('category').value;
+            const amount = parseFloat(document.getElementById('amount').value);
+            const paymentMethod = document.getElementById('paymentMethod').value;
+
+            // Basic validation
+            if (!purchaseDate || !vendor || !description || !category || isNaN(amount) || amount <= 0 || !paymentMethod) {
+                alert('Please fill in all required purchase details correctly.');
+                return;
+            }
+
+            // --- IMPORTANT: Simplified Double-Entry for Purchase ---
+            // You MUST ensure an appropriate 'Expense' account (e.g., 'Office Supplies Expense', 'Fuel Expense')
+            // and a 'Cash' or 'Bank' account exist in your backend database and get their IDs.
+            // For this example, we'll use placeholder IDs.
+            const CASH_BANK_ACCOUNT_ID = 3; // Example ID for an Asset account (Cash/Bank)
+            let EXPENSE_ACCOUNT_ID;          // This should vary based on category
+
+            // Map category to a specific expense account ID (you'd need to create these in backend)
+            switch(category) {
+                case 'office-supplies': EXPENSE_ACCOUNT_ID = 4; break; // Example ID for Office Supplies Expense
+                case 'fuel': EXPENSE_ACCOUNT_ID = 5; break;          // Example ID for Fuel Expense
+                case 'rent': EXPENSE_ACCOUNT_ID = 6; break;          // Example ID for Rent Expense
+                case 'utilities': EXPENSE_ACCOUNT_ID = 7; break;     // Example ID for Utilities Expense
+                case 'marketing': EXPENSE_ACCOUNT_ID = 8; break;     // Example ID for Marketing Expense
+                default: EXPENSE_ACCOUNT_ID = 9; break;              // Example ID for Other Expenses
+            }
+
+            if (!CASH_BANK_ACCOUNT_ID || !EXPENSE_ACCOUNT_ID) {
+                 alert('Error: Please ensure Cash/Bank and relevant Expense accounts are set up in your backend and their IDs are correctly configured in the frontend script.');
+                 return;
+            }
+
+            const authToken = localStorage.getItem('authToken');
+            if (!authToken) {
+                alert('You are not authenticated. Please log in.');
+                window.location.href = 'auth.html';
+                return;
+            }
+
+            const transactionData = {
+                description: `${description} (${vendor})`,
+                amount: amount,
+                debit_account_id: EXPENSE_ACCOUNT_ID,
+                credit_account_id: CASH_BANK_ACCOUNT_ID,
+                transaction_type: 'Expense',
+                date: purchaseDate
+            };
+
+            try {
+                const response = await fetch(`${BASE_URL}/transactions`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify(transactionData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('Purchase recorded successfully!');
+                    purchaseForm.reset();
+                    // Ideally, you'd refresh dashboard data here if on dashboard
+                } else {
+                    alert(`Failed to record purchase: ${data.message}`);
+                }
+            } catch (error) {
+                alert('Network error while recording purchase. Please check your backend server.');
+                console.error('Purchase recording error:', error);
+            }
+        });
+    }
+
+    // --- Dashboard Data Fetching (Backend Integration) ---
+    const recentTransactionsTableBody = document.querySelector('.recent-activity table tbody');
+    const currentCashBalanceWidget = document.querySelector('.widget-content .widget-value'); // Assuming this is for cash balance
+
+    if (recentTransactionsTableBody && currentCashBalanceWidget) { // Only run if on dashboard page
+        async function fetchDashboardData() {
+            const authToken = localStorage.getItem('authToken');
+            if (!authToken) {
+                // Handled by initial auth check, but good to have here too
+                return;
+            }
+
+            try {
+                // Fetch Transactions
+                const transactionsResponse = await fetch(`${BASE_URL}/transactions`, {
+                    method: 'GET',
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const transactionsData = await transactionsResponse.json();
+
+                if (transactionsResponse.ok) {
+                    recentTransactionsTableBody.innerHTML = ''; // Clear existing rows
+                    transactionsData.slice(0, 5).forEach(trans => { // Displaying top 5 recent transactions
+                        const row = document.createElement('tr');
+                        const amountClass = trans.transaction_type === 'Sale' ? 'amount-in' : 'amount-out';
+                        const statusClass = trans.transaction_type === 'Sale' ? 'status-paid' : 'status-completed'; // Simplified status
+                        
+                        row.innerHTML = `
+                            <td>${trans.date.split('T')[0]}</td>
+                            <td class="type-${trans.transaction_type.toLowerCase()}">${trans.transaction_type}</td>
+                            <td>${trans.description}</td>
+                            <td class="${amountClass}">${trans.amount.toFixed(2)}</td>
+                            <td class="${statusClass}">Recorded</td>
+                        `;
+                        recentTransactionsTableBody.appendChild(row);
+                    });
+                } else {
+                    console.error('Failed to fetch transactions:', transactionsData.message);
+                }
+
+                // Fetch Accounts for Cash Balance
+                const accountsResponse = await fetch(`${BASE_URL}/accounts`, {
+                    method: 'GET',
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const accountsData = await accountsResponse.json();
+
+                if (accountsResponse.ok) {
+                    // Find a 'Cash' or 'Bank' account and display its balance
+                    const cashAccount = accountsData.find(acc => acc.name === 'Cash' || acc.name === 'Bank Account'); // Adjust name as per your backend
+                    if (cashAccount) {
+                        currentCashBalanceWidget.textContent = `$${cashAccount.current_balance.toFixed(2)}`; // Assuming USD for display
+                    } else {
+                        currentCashBalanceWidget.textContent = '$0.00';
+                        console.warn('Cash or Bank Account not found. Please create one in your backend.');
+                    }
+                } else {
+                    console.error('Failed to fetch accounts:', accountsData.message);
+                }
+
+            } catch (error) {
+                console.error('Error fetching dashboard data:', error);
+            }
+        }
+        fetchDashboardData();
+    }
+
     // --- Dashboard Currency Selector Logic (from index.html) ---
     const currencySelector = document.getElementById('currency');
     if (currencySelector) {
-        // If you had dynamic widget values on dashboard, you'd add event listeners here
-        // currencySelector.addEventListener('change', updateDashboardWidgetCurrencies);
+        // This selector currently only affects display.
+        // In a real app, it would filter/convert backend data.
+        currencySelector.addEventListener('change', function() {
+            // You would re-fetch data or convert displayed values here
+            console.log('Currency changed to:', this.value);
+            // Re-call fetchDashboardData() if you implement currency conversion on backend
+        });
+    }
+
+    // --- Logout Functionality ---
+    const logoutBtn = document.getElementById('logout-btn'); // You'll add this button in index.html
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', function() {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('username');
+            window.location.href = 'auth.html'; // Redirect to login page
+        });
     }
 });
