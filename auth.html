@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login / Register - Autoserve Financials</title>
+    <link rel="stylesheet" href="accounting-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Specific styles for the auth page */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: var(--background-light);
+        }
+        .auth-container {
+            background-color: var(--background-dark);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: var(--shadow-medium);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .auth-container h1 {
+            font-size: 2em;
+            color: var(--primary-accent);
+            margin-bottom: 25px;
+        }
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .auth-form .form-group {
+            text-align: left;
+        }
+        .auth-form input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            background-color: var(--background-light);
+            color: var(--text-primary);
+        }
+        .auth-form button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+        .auth-form .primary-accent-btn {
+            background-color: var(--btn-primary-bg);
+            color: var(--btn-primary-text);
+        }
+        .auth-form .primary-accent-btn:hover {
+            background-color: var(--btn-primary-hover-bg);
+        }
+        .auth-form .secondary-btn {
+            background-color: var(--btn-secondary-bg);
+            color: var(--btn-secondary-text);
+        }
+        .auth-form .secondary-btn:hover {
+            background-color: var(--btn-secondary-hover-bg);
+        }
+        .toggle-form-link {
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+        .toggle-form-link:hover {
+            text-decoration: underline;
+        }
+        .message-box {
+            background-color: #ffeeba;
+            color: #856404;
+            border: 1px solid #ffeeba;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            display: none; /* Hidden by default */
+        }
+        .message-box.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border-color: #f5c6cb;
+        }
+        .message-box.success {
+            background-color: #d4edda;
+            color: #155724;
+            border-color: #c3e6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <h1 id="auth-title">Login</h1>
+        <div id="message-box" class="message-box"></div>
+
+        <form id="login-form" class="auth-form">
+            <div class="form-group">
+                <label for="loginUsername">Username:</label>
+                <input type="text" id="loginUsername" required>
+            </div>
+            <div class="form-group">
+                <label for="loginPassword">Password:</label>
+                <input type="password" id="loginPassword" required>
+            </div>
+            <button type="submit" class="primary-accent-btn">Login</button>
+            <p class="toggle-form-link" data-form="register">Don't have an account? Register here.</p>
+        </form>
+
+        <form id="register-form" class="auth-form hidden">
+            <div class="form-group">
+                <label for="registerUsername">Username:</label>
+                <input type="text" id="registerUsername" required>
+            </div>
+            <div class="form-group">
+                <label for="registerPassword">Password:</label>
+                <input type="password" id="registerPassword" required>
+            </div>
+            <button type="submit" class="primary-accent-btn">Register</button>
+            <p class="toggle-form-link" data-form="login">Already have an account? Login here.</p>
+        </form>
+    </div>
+
+    <script>
+        const BASE_URL = 'http://127.0.0.1:5000/api'; // Ensure this matches your Flask backend URL
+
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const authTitle = document.getElementById('auth-title');
+        const toggleLinks = document.querySelectorAll('.toggle-form-link');
+        const messageBox = document.getElementById('message-box');
+
+        // Function to display messages
+        function showMessage(message, type = 'info') {
+            messageBox.textContent = message;
+            messageBox.className = `message-box ${type}`; // Reset classes and add new type
+            messageBox.style.display = 'block';
+            setTimeout(() => {
+                messageBox.style.display = 'none';
+            }, 5000); // Hide after 5 seconds
+        }
+
+        // Toggle between login and register forms
+        toggleLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                const targetForm = this.dataset.form;
+                if (targetForm === 'login') {
+                    loginForm.classList.remove('hidden');
+                    registerForm.classList.add('hidden');
+                    authTitle.textContent = 'Login';
+                } else {
+                    registerForm.classList.remove('hidden');
+                    loginForm.classList.add('hidden');
+                    authTitle.textContent = 'Register';
+                }
+                messageBox.style.display = 'none'; // Clear message when toggling
+            });
+        });
+
+        // User Registration
+        registerForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const username = document.getElementById('registerUsername').value;
+            const password = document.getElementById('registerPassword').value;
+
+            try {
+                const response = await fetch(`${BASE_URL}/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showMessage('Registration successful! Please log in.', 'success');
+                    // Optionally auto-switch to login form
+                    loginForm.classList.remove('hidden');
+                    registerForm.classList.add('hidden');
+                    authTitle.textContent = 'Login';
+                    document.getElementById('loginUsername').value = username; // Pre-fill username
+                } else {
+                    showMessage(`Registration failed: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                showMessage('Network error during registration. Please try again.', 'error');
+                console.error('Registration error:', error);
+            }
+        });
+
+        // User Login
+        loginForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                const response = await fetch(`${BASE_URL}/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    localStorage.setItem('authToken', data.token);
+                    localStorage.setItem('username', username); // Store username for display
+                    showMessage('Login successful! Redirecting...', 'success');
+                    window.location.href = 'index.html'; // Redirect to dashboard
+                } else {
+                    showMessage(`Login failed: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                showMessage('Network error during login. Please try again.', 'error');
+                console.error('Login error:', error);
+            }
+        });
+
+        // Check if already authenticated on load
+        document.addEventListener('DOMContentLoaded', () => {
+            const authToken = localStorage.getItem('authToken');
+            if (authToken) {
+                // If token exists, assume logged in and redirect to dashboard
+                // In a real app, you'd validate the token with the backend
+                window.location.href = 'index.html';
+            }
+        });
+    </script>
+</body>
+</html>
