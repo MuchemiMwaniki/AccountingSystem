@@ -1,0 +1,501 @@
+/* Accounting System Theme Variables */
+:root {
+    --primary-accent: #DAA520; /* Rich Gold - for primary buttons, active states, key highlights */
+    --background-light: #f5f7fa; /* Very light gray - overall page background */
+    --background-dark: #e0e4eb; /* Slightly darker gray - for content cards/panels background */
+    --text-primary: #333333; /* Dark charcoal - main text */
+    --text-secondary: #666666; /* Medium gray - secondary text, labels */
+    --border-color: #cccccc; /* Light gray - for table borders, input fields */
+    --shadow-light: 0 2px 5px rgba(0, 0, 0, 0.08); /* Subtle shadow for cards */
+    --shadow-medium: 0 4px 10px rgba(0, 0, 0, 0.12); /* Slightly more prominent shadow on hover */
+
+    /* Sidebar specific colors */
+    --sidebar-bg: #2c3e50; /* Dark blue-gray - professional look */
+    --sidebar-text: #ffffff; /* White - for sidebar links */
+    --sidebar-hover-bg: #34495e; /* Slightly lighter dark blue-gray on hover */
+    --sidebar-active-bg: var(--primary-accent); /* Gold for active sidebar item */
+    --sidebar-active-text: #212121; /* Dark text on gold */
+
+    /* Button Colors */
+    --btn-primary-bg: var(--primary-accent);
+    --btn-primary-text: #212121;
+    --btn-primary-hover-bg: #c9931b;
+
+    --btn-secondary-bg: #95a5a6; /* Muted gray for secondary buttons */
+    --btn-secondary-text: #ffffff;
+    --btn-secondary-hover-bg: #7f8c8d;
+
+    /* Status/Notification Colors */
+    --status-paid: #28a745;   /* Green */
+    --status-pending: #ffc107; /* Amber/Warning */
+    --status-overdue: #dc3545; /* Red/Error */
+    --status-completed: #17a2b8; /* Info/Blue */
+
+    /* Widget Backgrounds (can be customized) */
+    --primary-accent-bg: var(--primary-accent);
+    --error-bg: #dc3545;
+    --info-bg: #17a2b8;
+    --warning-bg: #ffc107;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    background-color: var(--background-light);
+    color: var(--text-primary);
+    line-height: 1.6;
+    display: flex; /* Use flexbox for app container layout */
+    min-height: 100vh; /* Ensure app fills viewport height */
+}
+
+/* App Container Layout */
+.app-container {
+    display: flex;
+    width: 100%;
+}
+
+/* Sidebar Styling */
+.sidebar {
+    width: 250px;
+    min-width: 250px; /* Fixed width */
+    background-color: var(--sidebar-bg);
+    color: var(--sidebar-text);
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Push footer to bottom */
+    box-shadow: var(--shadow-medium);
+    transition: width 0.3s ease; /* For responsive collapsing */
+}
+
+.sidebar-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 0 15px;
+}
+
+.sidebar-logo {
+    height: 60px; /* Adjust as needed */
+    width: auto;
+    margin-bottom: 10px;
+}
+
+.app-title {
+    font-size: 1.6em;
+    font-weight: bold;
+    color: var(--primary-accent); /* Gold accent for app title */
+    display: block;
+    line-height: 1.2;
+}
+
+.sidebar-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-nav li {
+    margin-bottom: 5px;
+}
+
+.sidebar-nav .nav-item {
+    display: block;
+    padding: 12px 20px;
+    color: var(--sidebar-text);
+    text-decoration: none;
+    font-size: 1.1em;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.sidebar-nav .nav-item:hover {
+    background-color: var(--sidebar-hover-bg);
+}
+
+.sidebar-nav .nav-item.active {
+    background-color: var(--sidebar-active-bg);
+    color: var(--sidebar-active-text);
+    border-left: 5px solid var(--primary-accent); /* Highlight active item */
+    font-weight: bold;
+}
+
+.sidebar-nav .nav-item i {
+    margin-right: 10px;
+    font-size: 1.2em;
+}
+
+.sidebar-footer {
+    text-align: center;
+    font-size: 0.8em;
+    color: rgba(255, 255, 255, 0.7);
+    padding: 20px 15px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: 20px;
+}
+
+/* Main Content Styling */
+.main-content {
+    flex-grow: 1; /* Take remaining space */
+    padding: 30px;
+    background-color: var(--background-light);
+}
+
+.main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.page-title {
+    font-size: 2em;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.header-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.95em;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.primary-accent-btn {
+    background-color: var(--btn-primary-bg);
+    color: var(--btn-primary-text);
+}
+
+.primary-accent-btn:hover {
+    background-color: var(--btn-primary-hover-bg);
+}
+
+.secondary-btn {
+    background-color: var(--btn-secondary-bg);
+    color: var(--btn-secondary-text);
+}
+
+.secondary-btn:hover {
+    background-color: var(--btn-secondary-hover-bg);
+}
+
+.header-btn i {
+    margin-right: 8px;
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    color: var(--text-primary);
+    font-weight: bold;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 10px;
+    border: 2px solid var(--primary-accent);
+}
+
+/* Dashboard Widgets */
+.dashboard-widgets {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 25px;
+    margin-bottom: 40px;
+}
+
+.widget {
+    background-color: var(--background-dark); /* Card background for widgets */
+    border-radius: 8px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    box-shadow: var(--shadow-light);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.widget:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-medium);
+}
+
+.widget-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.8em;
+    color: #fff;
+    margin-right: 15px;
+}
+
+.widget-content {
+    flex-grow: 1;
+}
+
+.widget-label {
+    margin: 0;
+    font-size: 0.9em;
+    color: var(--text-secondary);
+}
+
+.widget-value {
+    margin: 5px 0 0;
+    font-size: 1.8em;
+    font-weight: bold;
+    color: var(--text-primary);
+}
+
+/* Status backgrounds for widgets and table cells */
+.primary-accent-bg { background-color: var(--primary-accent); }
+.error-bg { background-color: var(--error-color); }
+.info-bg { background-color: var(--info-color); }
+.warning-bg { background-color: var(--warning-color); }
+
+
+/* Sections below header */
+section {
+    margin-bottom: 40px;
+}
+
+h2 {
+    font-size: 1.6em;
+    color: var(--text-primary);
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 10px;
+}
+
+.card {
+    background-color: var(--background-dark); /* Using dark background for cards for contrast */
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: var(--shadow-light);
+}
+
+/* Table Styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+table thead th {
+    background-color: var(--background-light); /* Lighter background for table header */
+    color: var(--text-secondary);
+    font-size: 0.9em;
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+    text-transform: uppercase;
+}
+
+table tbody td {
+    padding: 12px 15px;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-primary);
+}
+
+table tbody tr:hover {
+    background-color: var(--background-light); /* Subtle hover for table rows */
+}
+
+/* Specific styling for amount types and statuses */
+.amount-in { color: var(--status-paid); font-weight: bold; } /* Green for income */
+.amount-out { color: var(--status-overdue); font-weight: bold; } /* Red for expenses */
+
+.status-paid { color: var(--status-paid); font-weight: bold; }
+.status-pending { color: var(--status-pending); font-weight: bold; }
+.status-overdue { color: var(--status-overdue); font-weight: bold; }
+.status-completed { color: var(--status-completed); font-weight: bold; }
+
+.type-invoice { color: var(--info-color); }
+.type-purchase { color: var(--error-color); }
+
+
+.placeholder-chart {
+    background-color: var(--background-light);
+    border: 1px dashed var(--border-color);
+    height: 250px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: var(--text-secondary);
+    font-style: italic;
+    font-size: 1.1em;
+    border-radius: 5px;
+}
+
+.placeholder-chart i {
+    font-size: 3em;
+    margin-bottom: 10px;
+    color: var(--text-secondary);
+}
+
+
+/* Responsive Design for smaller screens */
+@media (max-width: 992px) {
+    .sidebar {
+        width: 80px; /* Collapse sidebar */
+        min-width: 80px;
+    }
+
+    .sidebar-header .app-title,
+    .sidebar-nav .nav-item span { /* Hide text in collapsed sidebar */
+        display: none;
+    }
+
+    .sidebar-nav .nav-item {
+        padding: 12px 0;
+        text-align: center;
+    }
+    .sidebar-nav .nav-item i {
+        margin-right: 0; /* No margin when text is hidden */
+    }
+
+    .sidebar-active-bg { /* Adjust active style for collapsed sidebar */
+        border-left: none;
+        border-bottom: 3px solid var(--primary-accent);
+    }
+
+    .sidebar-footer {
+        display: none; /* Hide footer in collapsed state */
+    }
+
+    .main-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .header-actions {
+        flex-wrap: wrap;
+        justify-content: center;
+        width: 100%;
+    }
+
+    .page-title {
+        text-align: center;
+        width: 100%;
+    }
+
+    .dashboard-widgets {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .app-container {
+        flex-direction: column; /* Stack sidebar and main content */
+    }
+
+    .sidebar {
+        width: 100%; /* Full width sidebar at top */
+        min-width: 100%;
+        padding: 15px 0;
+        box-shadow: var(--shadow-light);
+    }
+
+    .sidebar-header {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    .sidebar-header .app-title {
+        display: block; /* Show title again on top */
+    }
+
+    .sidebar-nav ul {
+        display: flex;
+        flex-wrap: wrap; /* Allow nav items to wrap */
+        justify-content: center; /* Center nav items */
+        gap: 10px;
+    }
+
+    .sidebar-nav .nav-item {
+        padding: 8px 15px;
+        text-align: center;
+        font-size: 0.9em;
+        border-left: none; /* Remove left border */
+        border-radius: 5px; /* Add slight border radius for button-like appearance */
+    }
+    .sidebar-nav .nav-item i {
+        margin-right: 5px;
+    }
+
+    .sidebar-nav .nav-item.active {
+        border-bottom: none; /* Remove bottom border for active state */
+        background-color: var(--sidebar-active-bg); /* Use solid background */
+        color: var(--sidebar-active-text);
+    }
+    .sidebar-footer {
+        display: block; /* Show footer again */
+        text-align: center;
+        margin-top: 15px;
+    }
+
+    .main-content {
+        padding: 20px;
+    }
+
+    .dashboard-widgets {
+        grid-template-columns: 1fr; /* Stack widgets vertically */
+    }
+
+    table thead {
+        display: none; /* Hide table header on very small screens */
+    }
+
+    table, tbody, tr, td {
+        display: block; /* Make table elements behave like block elements */
+        width: 100%;
+    }
+
+    table tbody tr {
+        margin-bottom: 10px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        box-shadow: var(--shadow-light);
+        padding: 15px;
+    }
+
+    table tbody td {
+        text-align: right;
+        padding-left: 50%; /* Space for pseudo-element labels */
+        position: relative;
+        border: none;
+    }
+
+    table tbody td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 15px;
+        width: calc(50% - 30px);
+        padding-right: 10px;
+        white-space: nowrap;
+        text-align: left;
+        font-weight: bold;
+        color: var(--text-secondary);
+    }
+    /* Add data-label attributes to your <td> tags in HTML for this to work */
+    /* Example: <td data-label="Date">2025-07-25</td> */
+}
