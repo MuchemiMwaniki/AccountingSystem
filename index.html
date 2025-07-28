@@ -47,8 +47,9 @@
                     <button class="header-btn secondary-btn" onclick="location.href='purchase-form.html'"><i class="fas fa-plus"></i> New Purchase</button>
                     <div class="user-profile">
                         <img src="Model.jfif" alt="User Avatar" class="user-avatar">
-                        <span>John Doe</span>
+                        <span>John Doe</span> <!-- This will be updated by JS -->
                         <i class="fas fa-caret-down"></i>
+                        <button id="logout-btn" class="header-btn secondary-btn ml-4">Logout</button> <!-- Added Logout Button -->
                     </div>
                 </div>
             </header>
@@ -58,7 +59,7 @@
                     <div class="widget-icon primary-accent-bg"><i class="fas fa-dollar-sign"></i></div>
                     <div class="widget-content">
                         <p class="widget-label">Total Revenue (MTD)</p>
-                        <p class="widget-value">$12,345.67</p>
+                        <p class="widget-value">$12,345.67</p> <!-- This will be updated by JS from backend -->
                     </div>
                 </div>
 
@@ -66,7 +67,7 @@
                     <div class="widget-icon error-bg"><i class="fas fa-receipt"></i></div>
                     <div class="widget-content">
                         <p class="widget-label">Total Expenses (MTD)</p>
-                        <p class="widget-value">$4,567.89</p>
+                        <p class="widget-value">$4,567.89</p> <!-- This will be updated by JS from backend -->
                     </div>
                 </div>
 
@@ -74,7 +75,7 @@
                     <div class="widget-icon info-bg"><i class="fas fa-wallet"></i></div>
                     <div class="widget-content">
                         <p class="widget-label">Current Cash Balance</p>
-                        <p class="widget-value">$15,000.00</p>
+                        <p class="widget-value">$15,000.00</p> <!-- This will be updated by JS from backend -->
                     </div>
                 </div>
 
@@ -82,7 +83,7 @@
                     <div class="widget-icon warning-bg"><i class="fas fa-exclamation-triangle"></i></div>
                     <div class="widget-content">
                         <p class="widget-label">Outstanding Invoices</p>
-                        <p class="widget-value">5 ($2,500.00)</p>
+                        <p class="widget-value">5 ($2,500.00)</p> <!-- This will be updated by JS from backend -->
                     </div>
                 </div>
             </section>
@@ -101,41 +102,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>2025-07-25</td>
-                                <td class="type-invoice">Invoice</td>
-                                <td>Invoice #INV-2025-0012 to ABC Corp</td>
-                                <td class="amount-in">$1,200.00</td>
-                                <td class="status-paid">Paid</td>
-                            </tr>
-                            <tr>
-                                <td>2025-07-24</td>
-                                <td class="type-purchase">Purchase</td>
-                                <td>Office Supplies from XYZ Ltd</td>
-                                <td class="amount-out">-$150.00</td>
-                                <td class="status-completed">Completed</td>
-                            </tr>
-                            <tr>
-                                <td>2025-07-23</td>
-                                <td class="type-invoice">Invoice</td>
-                                <td>Invoice #INV-2025-0011 to Jane Smith</td>
-                                <td class="amount-in">$450.00</td>
-                                <td class="status-pending">Pending</td>
-                            </tr>
-                            <tr>
-                                <td>2025-07-22</td>
-                                <td class="type-purchase">Purchase</td>
-                                <td>Fuel for delivery vehicle</td>
-                                <td class="amount-out">-$80.00</td>
-                                <td class="status-completed">Completed</td>
-                            </tr>
-                            <tr>
-                                <td>2025-07-21</td>
-                                <td class="type-invoice">Invoice</td>
-                                <td>Invoice #INV-2025-0010 to Bob's Garage</td>
-                                <td class="amount-in">$900.00</td>
-                                <td class="status-paid">Paid</td>
-                            </tr>
+                            <!-- Transactions will be loaded here by accounting-script.js -->
                         </tbody>
                     </table>
                 </div>
@@ -143,3 +110,16 @@
 
             <section class="financial-summary">
                 <h2>Financial Overview
+                <!-- Placeholder for charts/summary -->
+                <div class="card placeholder-chart">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>Financial Charts will go here</span>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script src="accounting-script.js"></script>
+</body>
+</html>
