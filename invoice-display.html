@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Preview - Autoserve Financials</title>
+    <link rel="stylesheet" href="accounting-style.css">
+    <link rel="stylesheet" href="print.css" media="print">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Specific styles for the invoice display page to ensure it looks good */
+        body {
+            background-color: #f5f7fa; /* Light background for screen view */
+            margin: 20px;
+        }
+        .invoice-container {
+            width: 210mm; /* A4 width */
+            min-height: 297mm; /* A4 height */
+            margin: 20px auto; /* Center on page */
+            padding: 30mm 20mm; /* A4 margins */
+            background-color: #fff;
+            border: 1px solid #ddd;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+            box-sizing: border-box; /* Include padding in width/height */
+        }
+        .invoice-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 40px;
+            border-bottom: 2px solid var(--primary-accent);
+            padding-bottom: 15px;
+        }
+        .invoice-logo-section {
+            text-align: left;
+        }
+        .invoice-logo {
+            height: 80px; /* Larger logo for invoice */
+            margin-bottom: 10px;
+        }
+        .company-info {
+            font-size: 0.9em;
+            line-height: 1.5;
+            color: #555;
+        }
+        .invoice-title-section {
+            text-align: right;
+        }
+        .invoice-title {
+            font-size: 2.5em;
+            color: var(--primary-accent);
+            margin: 0;
+            text-transform: uppercase;
+        }
+        .invoice-number-date {
+            font-size: 1.1em;
+            margin-top: 10px;
+            line-height: 1.6;
+        }
+        .invoice-number-date span {
+            display: block;
+        }
+
+        .billing-shipping-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 40px;
+        }
+        .billing-info, .shipping-info {
+            width: 48%;
+            border: 1px solid #eee;
+            padding: 15px;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .billing-info h4, .shipping-info h4 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: var(--primary-accent);
+            font-size: 1.1em;
+        }
+        .billing-info p, .shipping-info p {
+            margin: 5px 0;
+            font-size: 0.95em;
+            line-height: 1.4;
+        }
+
+        .invoice-items table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+        .invoice-items th, .invoice-items td {
+            border: 1px solid #eee;
+            padding: 12px 15px;
+            text-align: left;
+            font-size: 0.95em;
+        }
+        .invoice-items th {
+            background-color: var(--background-light);
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+        .invoice-items td {
+            background-color: #fff;
+        }
+        .invoice-items td:last-child,
+        .invoice-items th:last-child {
+            text-align: right; /* Align amount columns to the right */
+        }
+
+        .invoice-summary {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+        .summary-details {
+            width: 40%;
+            border-top: 2px solid var(--primary-accent);
+            padding-top: 15px;
+        }
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            font-size: 1em;
+        }
+        .summary-row.total {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: var(--primary-accent);
+            margin-top: 10px;
+        }
+
+        .payment-terms {
+            margin-top: 40px;
+            font-size: 0.9em;
+            line-height: 1.6;
+            color: #666;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+        .payment-terms h4 {
+            margin-top: 0;
+            color: #333;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+
+        .print-actions {
+            text-align: center;
+            margin-top: 30px;
+        }
+        .print-actions button {
+            padding: 12px 25px;
+            font-size: 1.1em;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: var(--primary-accent);
+            color: var(--btn-primary-text);
+            transition: background-color 0.3s ease;
+        }
+        .print-actions button:hover {
+            background-color: var(--btn-primary-hover-bg);
+        }
+
+        /* Print specific adjustments (will be handled by print.css) */
+        @media print {
+            body {
+                margin: 0;
+                padding: 0;
+            }
+            .invoice-container {
+                margin: 0;
+                border: none;
+                box-shadow: none;
+                padding: 15mm 10mm; /* Adjust print margins */
+                height: auto; /* Allow content to flow to new pages */
+                min-height: auto;
+            }
+            .print-actions {
+                display: none !important; /* Hide print button in printout */
+            }
+            .invoice-header, .billing-shipping-info, .invoice-items table, .invoice-summary, .payment-terms {
+                page-break-inside: avoid; /* Try to keep these blocks together */
+            }
+            .invoice-items tbody tr {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice-container">
+        <div class="invoice-header">
+            <div class="invoice-logo-section">
+                <img src="favicon.png" alt="Autoserve Logo" class="invoice-logo">
+                <div class="company-info">
+                    <strong>Autoserve Financials</strong><br>
+                    123 Workshop Lane, Industrial Area<br>
+                    Nairobi, Kenya<br>
+                    Phone: +254 7XX XXX XXX<br>
+                    Email: info@autoserve.com<br>
+                    PIN: A000000000X
+                </div>
+            </div>
+            <div class="invoice-title-section">
+                <h1 class="invoice-title">Invoice</h1>
+                <div class="invoice-number-date">
+                    <span>Invoice #: <span id="display-invoice-number"></span></span>
+                    <span>Date: <span id="display-invoice-date"></span></span>
+                    <span>Due Date: <span id="display-due-date"></span></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="billing-shipping-info">
+            <div class="billing-info">
+                <h4>Bill To:</h4>
+                <p id="display-customer"></p>
+                </div>
+            </div>
+
+        <div class="invoice-items">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Description</th>
+                        <th>Qty</th>
+                        <th>Unit Price</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody id="invoice-display-items">
+                    </tbody>
+            </table>
+        </div>
+
+        <div class="invoice-summary">
+            <div class="summary-details">
+                <div class="summary-row">
+                    <span>Subtotal:</span>
+                    <span id="display-subtotal"></span>
+                </div>
+                <div class="summary-row">
+                    <span>Tax (<span id="display-tax-rate"></span>%):</span>
+                    <span id="display-total-tax"></span>
+                </div>
+                <div class="summary-row total">
+                    <span>Grand Total:</span>
+                    <span id="display-grand-total"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="payment-terms">
+            <h4>Payment Terms:</h4>
+            <p>Payment is due within 30 days of invoice date. Please make all checks payable to Autoserve Financials. For bank transfers, use the details below:</p>
+            <p><strong>Bank Name:</strong> XYZ Bank</p>
+            <p><strong>Account Name:</strong> Autoserve Financials</p>
+            <p><strong>Account Number:</strong> 1234567890</p>
+            <p><strong>SWIFT Code:</strong> XYZBANKKE</p>
+            <p>Thank you for your business!</p>
+        </div>
+    </div>
+
+    <div class="print-actions">
+        <button id="print-now-btn"><i class="fas fa-print"></i> Print Invoice</button>
+    </div>
+
+    <script src="invoice-display.js"></script>
+</body>
+</html>
