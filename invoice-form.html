@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>New Invoice - Autoserve Financials</title>
     <link rel="stylesheet" href="accounting-style.css">
-    <link rel="stylesheet" href="print.css" media="print">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
@@ -41,7 +40,8 @@
 
             <section class="form-section">
                 <div class="card">
-                    <form id="invoice-form" class="accounting-form"> <div class="form-group">
+                    <form id="invoice-form" class="accounting-form">
+                        <div class="form-group">
                             <label for="invoiceNumber">Invoice Number:</label>
                             <input type="text" id="invoiceNumber" placeholder="INV-2025-001" required>
                         </div>
@@ -104,8 +104,7 @@
                         </div>
 
                         <div class="form-actions">
-                            <button type="submit" class="primary-accent-btn"><i class="fas fa-save"></i> Save Invoice</button>
-                            <button type="button" id="print-invoice-btn" class="secondary-btn"><i class="fas fa-print"></i> Print Preview</button>
+                            <button type="submit" id="save-invoice-btn" class="primary-accent-btn"><i class="fas fa-save"></i> Save & View Invoice</button>
                             <button type="button" id="reset-invoice-btn" class="secondary-btn">Cancel / Reset</button>
                         </div>
                     </form>
