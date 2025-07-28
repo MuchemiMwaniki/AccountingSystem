@@ -1,0 +1,184 @@
+/* print.css */
+
+/* Hide elements not needed for print */
+@media print {
+    body {
+        background-color: #fff !important; /* White background for print */
+        color: #000 !important; /* Black text for print */
+        -webkit-print-color-adjust: exact; /* Ensure background colors are printed */
+        print-color-adjust: exact;
+    }
+
+    .app-container {
+        display: block !important; /* Override flex */
+    }
+
+    .sidebar,
+    .main-header .header-actions, /* Hide buttons like New Invoice, New Purchase, Back to Dashboard */
+    .form-actions, /* Hide form action buttons (Save, Print, Cancel) */
+    .form-group label, /* Hide labels in form groups if you want a more compact print */
+    .form-group input[type="file"], /* Hide file inputs */
+    .add-item-btn,
+    .remove-item-btn,
+    .currency-selector, /* Hide currency selector */
+    .user-profile i /* Hide dropdown caret for user */ {
+        display: none !important;
+    }
+
+    .main-content {
+        padding: 0 !important; /* Remove padding for maximum print area */
+        margin: 0 !important;
+        width: 100% !important; /* Ensure it takes full width */
+        max-width: none !important; /* Override any max-width */
+    }
+
+    .main-header {
+        border-bottom: none !important; /* Remove border from header */
+        margin-bottom: 20px !important;
+        display: block !important; /* Allow title to take full width */
+        text-align: center;
+    }
+
+    .page-title {
+        font-size: 1.5em !important;
+        margin-bottom: 10px !important;
+    }
+
+    /* Ensure form content is visible and well-formatted */
+    .form-section {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    .card {
+        box-shadow: none !important; /* Remove shadows for print */
+        border-radius: 0 !important; /* Remove border-radius */
+        padding: 0 !important;
+        background-color: transparent !important; /* Transparent background */
+    }
+
+    .accounting-form {
+        gap: 10px !important; /* Reduce gap between form groups */
+    }
+
+    .form-group {
+        flex-direction: row !important; /* Display label and input in one row */
+        align-items: baseline !important;
+        justify-content: space-between !important;
+        margin-bottom: 5px !important; /* Smaller margin between form groups */
+    }
+
+    .form-group label {
+        display: inline-block !important; /* Show labels for print */
+        width: 120px; /* Give labels a fixed width */
+        text-align: left;
+        font-weight: bold;
+        color: #000;
+    }
+
+    .form-group input[type="text"],
+    .form-group input[type="number"],
+    .form-group input[type="date"],
+    .form-group select {
+        border: none !important; /* Remove borders from inputs */
+        background-color: transparent !important; /* Transparent background */
+        padding: 0 !important;
+        font-size: 1em !important;
+        text-align: right; /* Align input values to the right */
+        flex-grow: 1; /* Allow input to take remaining space */
+        color: #000;
+    }
+
+    /* Invoice Items Specific Styling for Print */
+    h3 {
+        font-size: 1.2em !important;
+        margin-top: 20px !important;
+        margin-bottom: 10px !important;
+        border-bottom: 2px solid #000 !important;
+        padding-bottom: 5px !important;
+    }
+
+    #invoice-items-container {
+        gap: 0 !important; /* Remove gap for tighter item rows */
+        margin-bottom: 10px !important;
+    }
+
+    .item-row {
+        display: grid !important;
+        grid-template-columns: 2fr 0.8fr 1fr 1fr; /* No auto column for remove button */
+        gap: 5px !important; /* Smaller gap for items */
+        padding: 5px 0 !important;
+        border: none !important; /* Remove borders */
+        background-color: transparent !important;
+        page-break-inside: avoid; /* Keep item row together on a single page */
+    }
+
+    .item-row:not(:last-child) {
+        border-bottom: 1px dashed #ccc !important; /* Light dashed border between items */
+    }
+
+
+    .item-row .form-group input {
+        border: none !important;
+        background-color: transparent !important;
+        padding: 0 !important;
+        text-align: left !important; /* Align item inputs to the left */
+    }
+
+    .item-row .form-group label {
+        display: none !important; /* Hide labels for individual item fields */
+    }
+
+    .item-calculated-total {
+        font-weight: bold;
+        color: #000;
+        text-align: right !important; /* Align total to the right */
+        border: none !important;
+        background-color: transparent !important;
+        padding: 0 !important;
+    }
+
+    /* Form Summary for Print */
+    .form-summary {
+        background-color: transparent !important;
+        border: none !important;
+        border-radius: 0 !important;
+        padding: 0 !important;
+        margin-top: 20px !important;
+        border-top: 1px solid #000 !important; /* Stronger border for summary */
+        padding-top: 10px !important;
+    }
+
+    .summary-line {
+        border-bottom: none !important; /* Remove dashed border */
+        padding: 3px 0 !important;
+    }
+
+    .summary-line span:first-child {
+        font-weight: normal;
+        color: #000;
+    }
+
+    .summary-line span:last-child,
+    .summary-line input[type="number"] {
+        font-weight: bold;
+        color: #000;
+        text-align: right !important;
+    }
+
+    .total-amount {
+        font-size: 1.4em !important;
+        font-weight: bold;
+        padding-top: 8px !important;
+        border-top: 2px solid #000 !important;
+        color: #000 !important;
+    }
+
+    /* Page breaks for multi-page invoices */
+    .item-row {
+        page-break-inside: avoid;
+    }
+    .form-summary {
+        page-break-before: avoid;
+    }
+}
