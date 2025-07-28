@@ -18,46 +18,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Handle form submission (frontend mock-up only)
-    const accountingForms = document.querySelectorAll('.accounting-form');
-    accountingForms.forEach(form => {
-        form.addEventListener('submit', function(event) {
-            event.preventDefault(); // Prevent default form submission
-
-            let isValid = true;
-            // Basic validation for invoice items if on invoice form
-            if (form.id === 'invoice-form') {
-                document.querySelectorAll('.item-row').forEach(row => {
-                    const desc = row.querySelector('[id^="itemDesc"]').value.trim();
-                    const qty = parseFloat(row.querySelector('[id^="itemQty"]').value);
-                    const price = parseFloat(row.querySelector('[id^="itemPrice"]').value);
-
-                    if (!desc || isNaN(qty) || qty <= 0 || isNaN(price) || price < 0) {
-                        isValid = false;
-                        alert('Please fill in all invoice item details correctly (description, quantity > 0, price >= 0).');
-                        // In a real app, add visual feedback (e.g., red borders, error messages)
-                        return;
-                    }
-                });
-            }
-
-            if (isValid) {
-                alert(`Form submitted! (This is a frontend mock-up, data for ${form.id || 'this form'} is not saved.)`);
-                // In a real application, you would send this data to your backend here.
-                // Example:
-                // const formData = new FormData(form);
-                // fetch('/api/save-invoice', { method: 'POST', body: formData })
-                //   .then(response => response.json())
-                //   .then(data => console.log(data));
-                form.reset(); // Optionally clear the form
-                if (form.id === 'invoice-form') {
-                    // Re-initialize invoice form after reset
-                    initializeInvoiceForm();
-                }
-            }
-        });
-    });
-
     // --- Invoice Form Specific Logic ---
     const invoiceItemsContainer = document.getElementById('invoice-items-container');
     const addItemBtn = document.querySelector('.add-item-btn');
@@ -65,7 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const taxRateInput = document.getElementById('taxRate');
     const totalTaxSpan = document.getElementById('totalTax');
     const grandTotalSpan = document.getElementById('grandTotal');
-    const printInvoiceBtn = document.getElementById('print-invoice-btn');
+    const saveInvoiceBtn = document.getElementById('save-invoice-btn'); // New ID
     const resetInvoiceBtn = document.getElementById('reset-invoice-btn');
     const customerSuggestionsDatalist = document.getElementById('customer-suggestions');
     const productSuggestionsDatalist = document.getElementById('product-suggestions');
@@ -163,7 +123,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (itemDescInput && productSuggestionsDatalist) {
                 const selectedProductName = itemDescInput.value;
                 const matchingProduct = mockProducts.find(p => p.name === selectedProductName);
-                if (matchingProduct && priceInput.value === '0.00') { // Only auto-fill if price is 0
+                if (matchingProduct && priceInput.value === '0.00' && selectedProductName) { // Only auto-fill if price is 0 and a product is selected
                     price = matchingProduct.price;
                     priceInput.value = price.toFixed(2);
                 }
@@ -189,10 +149,8 @@ document.addEventListener('DOMContentLoaded', function() {
         let displayCurrency = 'KES';
         if (currencySelector) { // If on dashboard, use its currency
             displayCurrency = currencySelector.value;
-        } else {
-            // If on invoice form, and no currency selector exists here, use default.
-            // In a real app, currency would be passed to the form or fetched.
         }
+        // else: use default 'KES' for invoice form
 
         if (grandTotalSpan) grandTotalSpan.textContent = grandTotal.toFixed(2) + ' ' + displayCurrency;
     }
@@ -223,12 +181,12 @@ document.addEventListener('DOMContentLoaded', function() {
         invoiceItemsContainer.appendChild(newRow);
 
         // Attach event listeners to new row's inputs
-        newRow.querySelectorAll('input[type="number"], input[type="text"]').forEach(input => {
+        newRow.querySelectorAll('input[type="number"]').forEach(input => {
             input.addEventListener('input', calculateTotals);
-            if (input.id.startsWith('itemDesc')) { // For product description, add change listener for autofill
-                input.addEventListener('change', calculateTotals);
-            }
         });
+        // Attach listener for description change (for price autofill)
+        newRow.querySelector('[id^="itemDesc-"]').addEventListener('change', calculateTotals);
+
 
         // Attach event listener for remove button
         newRow.querySelector('.remove-item-btn').addEventListener('click', function() {
@@ -239,11 +197,11 @@ document.addEventListener('DOMContentLoaded', function() {
         calculateTotals(); // Recalculate for the new row added
     }
 
-    // Initialize invoice form on page load
-    if (invoiceItemsContainer) { // Check if on invoice-form.html
+    // --- Form Submission / Data Handling ---
+    if (document.getElementById('invoice-form')) { // Only run if on invoice-form.html
         populateDatalists();
-        initializeInvoiceForm(); // Call this to set up the initial row and dates
-        
+        initializeInvoiceForm();
+
         // Add event listeners for initial elements after initializeForm
         if (taxRateInput) {
             taxRateInput.addEventListener('input', calculateTotals);
@@ -256,10 +214,60 @@ document.addEventListener('DOMContentLoaded', function() {
             invoiceDateInput.addEventListener('change', setDueDate);
         }
 
-        // Event listener for Print Preview button
-        if (printInvoiceBtn) {
-            printInvoiceBtn.addEventListener('click', function() {
-                window.print(); // Triggers browser's print dialog
+        // Event listener for Save & View Invoice button
+        if (saveInvoiceBtn) {
+            saveInvoiceBtn.addEventListener('click', function(event) {
+                event.preventDefault(); // Prevent default form submission
+
+                const form = document.getElementById('invoice-form');
+                // Basic validation for invoice items
+                let isValid = true;
+                document.querySelectorAll('.item-row').forEach(row => {
+                    const desc = row.querySelector('[id^="itemDesc-"]').value.trim();
+                    const qty = parseFloat(row.querySelector('[id^="itemQty-"]').value);
+                    const price = parseFloat(row.querySelector('[id^="itemPrice-"]').value);
+
+                    if (!desc || isNaN(qty) || qty <= 0 || isNaN(price) || price < 0) {
+                        isValid = false;
+                        alert('Please fill in all invoice item details correctly (description, quantity > 0, price >= 0).');
+                        return;
+                    }
+                });
+
+                if (isValid) {
+                    // Collect all form data
+                    const invoiceData = {
+                        invoiceNumber: document.getElementById('invoiceNumber').value,
+                        invoiceDate: document.getElementById('invoiceDate').value,
+                        customer: document.getElementById('customer').value,
+                        dueDate: document.getElementById('dueDate').value,
+                        items: [],
+                        subtotal: subtotalSpan.textContent,
+                        taxRate: taxRateInput.value,
+                        totalTax: totalTaxSpan.textContent,
+                        grandTotal: grandTotalSpan.textContent
+                    };
+
+                    document.querySelectorAll('.item-row').forEach(row => {
+                        invoiceData.items.push({
+                            description: row.querySelector('[id^="itemDesc-"]').value,
+                            quantity: parseFloat(row.querySelector('[id^="itemQty-"]').value),
+                            unitPrice: parseFloat(row.querySelector('[id^="itemPrice-"]').value),
+                            total: parseFloat(row.querySelector('.item-calculated-total').textContent)
+                        });
+                    });
+
+                    // Save data to localStorage
+                    localStorage.setItem('currentInvoiceData', JSON.stringify(invoiceData));
+
+                    // In a real app, you would send this data to your backend here.
+                    // alert('Invoice data collected and saved locally! Now opening print preview.');
+
+                    // Redirect to the invoice display page
+                    window.open('invoice-display.html', '_blank'); // Open in new tab
+                    form.reset(); // Optionally clear the form after viewing
+                    initializeInvoiceForm(); // Re-initialize for new invoice entry
+                }
             });
         }
 
@@ -274,11 +282,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // --- Dashboard Currency Selector Logic ---
+    // --- Dashboard Currency Selector Logic (from index.html) ---
     const currencySelector = document.getElementById('currency');
-    // The dashboard has widgets with static values, so changing currency on dashboard
-    // will primarily be a visual cue for future dynamic data.
-    // For now, it directly affects the currency displayed on the invoice grand total.
     if (currencySelector) {
         // If you had dynamic widget values on dashboard, you'd add event listeners here
         // currencySelector.addEventListener('change', updateDashboardWidgetCurrencies);
