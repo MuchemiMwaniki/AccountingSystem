@@ -257,7 +257,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     // You would need to create these accounts via your backend's /api/accounts endpoint first.
                     const ACCOUNTS_RECEIVABLE_ID = 1; // Example ID for an Asset account
                     const SALES_REVENUE_ID = 2;       // Example ID for a Revenue account
-                    const VAT_PAYABLE_ID = 10;        // NEW: Example ID for a Liability account (VAT Payable)
+                    const VAT_PAYABLE_ID = 6;        // NEW: Example ID for a Liability account (VAT Payable)
 
                     if (!ACCOUNTS_RECEIVABLE_ID || !SALES_REVENUE_ID || !VAT_PAYABLE_ID) {
                         alert('Error: Please ensure Accounts Receivable, Sales Revenue, AND VAT Payable accounts are set up in your backend and their IDs are correctly configured in the frontend script.');
