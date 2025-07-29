@@ -13,22 +13,26 @@ document.addEventListener('DOMContentLoaded', function() {
         // Populate items table
         const itemsTableBody = document.getElementById('invoice-display-items');
         itemsTableBody.innerHTML = ''; // Clear any existing content
+
+        // Define headers for data-label attributes
+        const headers = ["#", "Description", "Qty", "Unit Price (Inc. VAT)", "Total (Inc. VAT)"];
+
         invoiceData.items.forEach((item, index) => {
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td>${index + 1}</td>
-                <td>${item.description}</td>
-                <td>${item.quantity}</td>
-                <td>${item.unitPrice.toFixed(2)}</td>
-                <td>${item.total.toFixed(2)}</td>
+                <td data-label="${headers[0]}">${index + 1}</td>
+                <td data-label="${headers[1]}">${item.description}</td>
+                <td data-label="${headers[2]}">${item.quantity}</td>
+                <td data-label="${headers[3]}">${item.unitPrice.toFixed(2)}</td>
+                <td data-label="${headers[4]}">${item.total.toFixed(2)}</td>
             `;
             itemsTableBody.appendChild(row);
         });
 
         // Populate summary details with new keys
-        document.getElementById('display-subtotal').textContent = invoiceData.netSubtotal; // Now displays Net Subtotal
+        document.getElementById('display-subtotal').textContent = invoiceData.netSubtotal;
         document.getElementById('display-tax-rate').textContent = invoiceData.taxRate;
-        document.getElementById('display-total-tax').textContent = invoiceData.totalVATAmount; // Now displays VAT Total
+        document.getElementById('display-total-tax').textContent = invoiceData.totalVATAmount;
         document.getElementById('display-grand-total').textContent = invoiceData.grandTotal;
 
         // Add print button functionality
