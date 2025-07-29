@@ -1,5 +1,15 @@
 document.addEventListener('DOMContentLoaded', function() {
     const invoiceDataString = localStorage.getItem('currentInvoiceData');
+    const paperSizeSelector = document.getElementById('paperSize');
+    const bodyElement = document.body;
+
+    // Set initial paper size from selector or default
+    if (paperSizeSelector) {
+        bodyElement.setAttribute('data-paper-size', paperSizeSelector.value);
+        paperSizeSelector.addEventListener('change', function() {
+            bodyElement.setAttribute('data-paper-size', this.value);
+        });
+    }
 
     if (invoiceDataString) {
         const invoiceData = JSON.parse(invoiceDataString);
