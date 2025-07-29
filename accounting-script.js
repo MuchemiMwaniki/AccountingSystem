@@ -255,9 +255,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     // Placeholder Account IDs (replace with actual IDs from your backend)
                     // You would need to create these accounts via your backend's /api/accounts endpoint first.
-                    const ACCOUNTS_RECEIVABLE_ID = 1; // Example ID for an Asset account
-                    const SALES_REVENUE_ID = 2;       // Example ID for a Revenue account
-                    const VAT_PAYABLE_ID = 6;        // NEW: Example ID for a Liability account (VAT Payable)
+                    const ACCOUNTS_RECEIVABLE_ID = 9; // Example ID for an Asset account
+                    const SALES_REVENUE_ID = 10;       // Example ID for a Revenue account
+                    const VAT_PAYABLE_ID = 13;        // NEW: Example ID for a Liability account (VAT Payable)
 
                     if (!ACCOUNTS_RECEIVABLE_ID || !SALES_REVENUE_ID || !VAT_PAYABLE_ID) {
                         alert('Error: Please ensure Accounts Receivable, Sales Revenue, AND VAT Payable accounts are set up in your backend and their IDs are correctly configured in the frontend script.');
@@ -396,9 +396,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Map category to a specific expense account ID (you'd need to create these in backend)
             switch(category) {
-                case 'office-supplies': EXPENSE_ACCOUNT_ID = 4; break; // Example ID for Office Supplies Expense
-                case 'fuel': EXPENSE_ACCOUNT_ID = 5; break;          // Example ID for Fuel Expense
-                case 'rent': EXPENSE_ACCOUNT_ID = 6; break;          // Example ID for Rent Expense
+                case 'office-supplies': EXPENSE_ACCOUNT_ID = 10; break; // Example ID for Office Supplies Expense
+                case 'fuel': EXPENSE_ACCOUNT_ID = 11; break;          // Example ID for Fuel Expense
+                case 'rent': EXPENSE_ACCOUNT_ID = 12; break;          // Example ID for Rent Expense
                 case 'utilities': EXPENSE_ACCOUNT_ID = 7; break;     // Example ID for Utilities Expense
                 case 'marketing': EXPENSE_ACCOUNT_ID = 8; break;     // Example ID for Marketing Expense
                 default: EXPENSE_ACCOUNT_ID = 9; break;              // Example ID for Other Expenses
