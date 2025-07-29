@@ -10,10 +10,10 @@
         print-color-adjust: exact;
         margin: 0; /* Remove body margin for full control */
         padding: 0;
-        /* Force page size for A4 portrait, common for invoices */
+        box-sizing: border-box; /* Include padding in width/height */
+        /* Default to A4, can be overridden by @page rule below */
         width: 210mm;
         min-height: 297mm;
-        box-sizing: border-box; /* Include padding in width/height */
     }
 
     /* Hide elements that should never print */
@@ -28,6 +28,7 @@
     .currency-selector,
     .user-profile i,
     .print-actions, /* Hide the print button itself */
+    .paper-size-selector, /* Hide the paper size selector on print */
     /* Hide specific sections that are not part of the invoice content */
     .dashboard-widgets,
     .recent-activity,
@@ -104,7 +105,7 @@
         width: 100% !important;
         border-collapse: collapse !important;
         margin-bottom: 20px !important; /* Adjust margin */
-        font-size: 0.85em !important; /* Adjust font size */
+        font-size: 0.8em !important; /* Slightly smaller font for table content */
         display: block !important; /* Make the table itself behave as a block */
     }
 
@@ -123,26 +124,29 @@
         border-radius: 4px !important; /* Slightly rounded corners */
         padding: 8px !important; /* Padding within each row block */
         box-shadow: none !important; /* No shadows for print */
+        page-break-inside: avoid !important; /* Try to keep rows from breaking across pages */
     }
 
     .invoice-table td {
         display: block !important; /* Make each cell behave as a block */
         width: 100% !important; /* Each cell takes full width of its row block */
         text-align: right !important; /* Align the value to the right */
-        padding-left: 45% !important; /* Space for the pseudo-element label */
+        padding-left: 50% !important; /* Increased space for the pseudo-element label */
         position: relative !important; /* Needed for absolute positioning of ::before */
         border: none !important; /* Remove individual cell borders */
         padding-top: 2px !important; /* Adjust vertical padding */
         padding-bottom: 2px !important;
+        word-wrap: break-word !important; /* Force long words to break */
+        overflow-wrap: break-word !important; /* Ensure content wraps */
     }
 
     .invoice-table td::before {
         content: attr(data-label) !important; /* Display the data-label as a prefix */
         position: absolute !important;
         left: 8px !important; /* Position the label on the left */
-        width: calc(45% - 16px) !important; /* Width for the label */
+        width: calc(50% - 16px) !important; /* Adjusted width for the label */
         padding-right: 8px !important;
-        white-space: nowrap !important; /* Prevent label from wrapping */
+        white-space: normal !important; /* Allow label to wrap if needed */
         text-align: left !important; /* Align label to the left */
         font-weight: bold !important;
         color: #555 !important; /* Darker color for labels */
@@ -193,9 +197,25 @@
         margin-bottom: 5px !important;
     }
 
+    /* --- Page Break Control --- */
+    .page-break {
+        page-break-after: always !important; /* Forces a page break after this element */
+    }
+
     /* Remove browser default headers/footers (URLs, page numbers) */
     @page {
-        size: A4 portrait; /* Set page size explicitly */
+        size: A4 portrait; /* Default page size */
         margin: 0; /* Remove default browser margins */
     }
+
+    /* Specific page sizes based on data-paper-size on body */
+    body[data-paper-size="letter"] {
+        width: 8.5in;
+        min-height: 11in;
+    }
+    body[data-paper-size="a4"] {
+        width: 210mm;
+        min-height: 297mm;
+    }
+    /* Add more sizes as needed */
 }
