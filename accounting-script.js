@@ -37,9 +37,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // --- Invoice Form Specific Logic ---
     const invoiceItemsContainer = document.getElementById('invoice-items-container');
     const addItemBtn = document.querySelector('.add-item-btn');
-    const subtotalSpan = document.getElementById('subtotal');
+    const subtotalSpan = document.getElementById('subtotal'); // This will now be Net Subtotal
     const taxRateInput = document.getElementById('taxRate');
-    const totalTaxSpan = document.getElementById('totalTax');
+    const totalTaxSpan = document.getElementById('totalTax'); // This will now be VAT Total
     const grandTotalSpan = document.getElementById('grandTotal');
     const saveInvoiceBtn = document.getElementById('save-invoice-btn');
     const resetInvoiceBtn = document.getElementById('reset-invoice-btn');
@@ -101,7 +101,7 @@ document.addEventListener('DOMContentLoaded', function() {
         addInvoiceItemRow();
 
         if (subtotalSpan) subtotalSpan.textContent = '0.00';
-        if (taxRateInput) taxRateInput.value = '16'; // Changed default value to 16
+        if (taxRateInput) taxRateInput.value = '16'; // Default VAT to 16%
         if (totalTaxSpan) totalTaxSpan.textContent = '0.00';
         if (grandTotalSpan) grandTotalSpan.textContent = '0.00 KES';
 
@@ -119,38 +119,48 @@ document.addEventListener('DOMContentLoaded', function() {
     function calculateTotals() {
         if (!invoiceItemsContainer) return;
 
-        let subtotal = 0;
+        let totalGrossAmount = 0; // Sum of all item totals (inclusive of VAT)
+        let totalNetSubtotal = 0; // Sum of all item net totals (exclusive of VAT)
+        let totalVATAmount = 0;   // Sum of all item VAT amounts
+
+        const taxRate = parseFloat(taxRateInput ? taxRateInput.value : 0) || 0;
+        const taxFactor = 1 + (taxRate / 100); // e.g., 1.16 for 16% VAT
+
         document.querySelectorAll('.item-row').forEach(row => {
             const qtyInput = row.querySelector('[id^="itemQty-"]');
-            const priceInput = row.querySelector('[id^="itemPrice-"]');
+            const priceInput = row.querySelector('[id^="itemPrice-"]'); // This is the GROSS unit price
             const itemDescInput = row.querySelector('[id^="itemDesc-"]');
 
             const qty = parseFloat(qtyInput ? qtyInput.value : 0) || 0;
-            let price = parseFloat(priceInput ? priceInput.value : 0) || 0;
+            let grossUnitPrice = parseFloat(priceInput ? priceInput.value : 0) || 0;
 
             if (itemDescInput && productSuggestionsDatalist) {
                 const selectedProductName = itemDescInput.value;
                 const matchingProduct = mockProducts.find(p => p.name === selectedProductName);
-                if (matchingProduct && priceInput.value === '0.00' && selectedProductName) {
-                    price = matchingProduct.price;
-                    priceInput.value = price.toFixed(2);
+                if (matchingProduct && grossUnitPrice === 0 && selectedProductName) { // Only pre-fill if price is 0
+                    grossUnitPrice = matchingProduct.price;
+                    priceInput.value = grossUnitPrice.toFixed(2);
                 }
             }
 
-            const itemTotal = qty * price;
+            const grossItemTotal = qty * grossUnitPrice; // Total for this item, inclusive of VAT
+            const netItemTotal = grossItemTotal / taxFactor; // Net total for this item
+            const itemVATAmount = grossItemTotal - netItemTotal; // VAT amount for this item
+
             const itemTotalSpan = row.querySelector('.item-calculated-total');
             if (itemTotalSpan) {
-                itemTotalSpan.textContent = itemTotal.toFixed(2);
+                // Display the gross total for the item row
+                itemTotalSpan.textContent = grossItemTotal.toFixed(2);
             }
-            subtotal += itemTotal;
+
+            totalGrossAmount += grossItemTotal;
+            totalNetSubtotal += netItemTotal;
+            totalVATAmount += itemVATAmount;
         });
 
-        const taxRate = parseFloat(taxRateInput ? taxRateInput.value : 0) || 0;
-        const totalTax = subtotal * (taxRate / 100);
-        const grandTotal = subtotal + totalTax;
-
-        if (subtotalSpan) subtotalSpan.textContent = subtotal.toFixed(2);
-        if (totalTaxSpan) totalTaxSpan.textContent = totalTax.toFixed(2);
+        // Update summary spans
+        if (subtotalSpan) subtotalSpan.textContent = totalNetSubtotal.toFixed(2); // This is now Net Subtotal
+        if (totalTaxSpan) totalTaxSpan.textContent = totalVATAmount.toFixed(2);   // This is now VAT Total
 
         const currencySelector = document.getElementById('currency');
         let displayCurrency = 'KES';
@@ -158,7 +168,8 @@ document.addEventListener('DOMContentLoaded', function() {
             displayCurrency = currencySelector.value;
         }
 
-        if (grandTotalSpan) grandTotalSpan.textContent = grandTotal.toFixed(2) + ' ' + displayCurrency;
+        // Grand Total remains the total gross amount
+        if (grandTotalSpan) grandTotalSpan.textContent = totalGrossAmount.toFixed(2) + ' ' + displayCurrency;
     }
 
     function addInvoiceItemRow() {
@@ -175,11 +186,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 <input type="number" id="itemQty-${itemCounter}" value="1" min="1" required>
             </div>
             <div class="form-group item-price">
-                <label for="itemPrice-${itemCounter}">Unit Price:</label>
+                <label for="itemPrice-${itemCounter}">Unit Price (Inc. VAT):</label> <!-- Updated label -->
                 <input type="number" id="itemPrice-${itemCounter}" step="0.01" value="0.00" required>
             </div>
             <div class="form-group item-total">
-                <label>Total:</label>
+                <label>Total (Inc. VAT):</label> <!-- Updated label -->
                 <span class="item-calculated-total">0.00</span>
             </div>
             <button type="button" class="remove-item-btn"><i class="fas fa-times"></i></button>
@@ -224,7 +235,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.querySelectorAll('.item-row').forEach(row => {
                     const desc = row.querySelector('[id^="itemDesc-"]').value.trim();
                     const qty = parseFloat(row.querySelector('[id^="itemQty-"]').value);
-                    const price = parseFloat(row.querySelector('[id^="itemPrice-"]').value);
+                    const price = parseFloat(row.querySelector('[id^="itemPrice-"]').value); // This is gross price
 
                     if (!desc || isNaN(qty) || qty <= 0 || isNaN(price) || price < 0) {
                         isValid = false;
@@ -237,15 +248,19 @@ document.addEventListener('DOMContentLoaded', function() {
                     const invoiceNumber = document.getElementById('invoiceNumber').value;
                     const invoiceDate = document.getElementById('invoiceDate').value;
                     const customerName = document.getElementById('customer').value;
-                    const grandTotal = parseFloat(grandTotalSpan.textContent.replace(' KES', ''));
+                    const grandTotal = parseFloat(grandTotalSpan.textContent.replace(' KES', '')); // This is the total GROSS amount
+                    const netSubtotal = parseFloat(subtotalSpan.textContent); // This is the calculated NET subtotal
+                    const totalVATAmount = parseFloat(totalTaxSpan.textContent); // This is the calculated VAT total
+                    const taxRate = parseFloat(taxRateInput.value);
 
                     // Placeholder Account IDs (replace with actual IDs from your backend)
                     // You would need to create these accounts via your backend's /api/accounts endpoint first.
                     const ACCOUNTS_RECEIVABLE_ID = 1; // Example ID for an Asset account
                     const SALES_REVENUE_ID = 2;       // Example ID for a Revenue account
+                    const VAT_PAYABLE_ID = 10;        // NEW: Example ID for a Liability account (VAT Payable)
 
-                    if (!ACCOUNTS_RECEIVABLE_ID || !SALES_REVENUE_ID) {
-                        alert('Error: Please ensure Accounts Receivable and Sales Revenue accounts are set up in your backend and their IDs are correctly configured in the frontend script.');
+                    if (!ACCOUNTS_RECEIVABLE_ID || !SALES_REVENUE_ID || !VAT_PAYABLE_ID) {
+                        alert('Error: Please ensure Accounts Receivable, Sales Revenue, AND VAT Payable accounts are set up in your backend and their IDs are correctly configured in the frontend script.');
                         return;
                     }
 
@@ -256,57 +271,88 @@ document.addEventListener('DOMContentLoaded', function() {
                         return;
                     }
 
-                    const transactionData = {
-                        description: `Invoice #${invoiceNumber} for ${customerName}`,
-                        amount: grandTotal,
+                    // --- Send two transactions to backend for double-entry ---
+                    // 1. Record the Sale (Net Amount)
+                    const salesTransactionData = {
+                        description: `Sale (Net) for Invoice #${invoiceNumber} to ${customerName}`,
+                        amount: netSubtotal, // Send the NET amount for Sales Revenue
                         debit_account_id: ACCOUNTS_RECEIVABLE_ID,
                         credit_account_id: SALES_REVENUE_ID,
                         transaction_type: 'Sale',
                         date: invoiceDate
                     };
 
+                    // 2. Record the VAT component (if any)
+                    const vatTransactionData = {
+                        description: `VAT for Invoice #${invoiceNumber}`,
+                        amount: totalVATAmount, // Send the VAT amount
+                        debit_account_id: ACCOUNTS_RECEIVABLE_ID, // Customer owes this VAT
+                        credit_account_id: VAT_PAYABLE_ID,         // This is a liability to the tax authority
+                        transaction_type: 'VAT Collection',
+                        date: invoiceDate
+                    };
+
                     try {
-                        const response = await fetch(`${BASE_URL}/transactions`, {
+                        // Send Sales Transaction
+                        const salesResponse = await fetch(`${BASE_URL}/transactions`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
                                 'Authorization': `Bearer ${authToken}`
                             },
-                            body: JSON.stringify(transactionData)
+                            body: JSON.stringify(salesTransactionData)
                         });
+                        const salesData = await salesResponse.json();
 
-                        const data = await response.json();
-
-                        if (response.ok) {
-                            alert('Invoice recorded successfully!');
-                            // Store data locally for invoice-display.html (temporary, should be backend-driven)
-                            const invoiceDataForDisplay = {
-                                invoiceNumber: invoiceNumber,
-                                invoiceDate: invoiceDate,
-                                customer: customerName,
-                                dueDate: document.getElementById('dueDate').value,
-                                items: [],
-                                subtotal: subtotalSpan.textContent,
-                                taxRate: taxRateInput.value,
-                                totalTax: totalTaxSpan.textContent,
-                                grandTotal: grandTotalSpan.textContent
-                            };
-                             document.querySelectorAll('.item-row').forEach(row => {
-                                invoiceDataForDisplay.items.push({
-                                    description: row.querySelector('[id^="itemDesc-"]').value,
-                                    quantity: parseFloat(row.querySelector('[id^="itemQty-"]').value),
-                                    unitPrice: parseFloat(row.querySelector('[id^="itemPrice-"]').value),
-                                    total: parseFloat(row.querySelector('.item-calculated-total').textContent)
-                                });
-                            });
-                            localStorage.setItem('currentInvoiceData', JSON.stringify(invoiceDataForDisplay));
-
-                            window.open('invoice-display.html', '_blank');
-                            form.reset();
-                            initializeInvoiceForm();
-                        } else {
-                            alert(`Failed to record invoice: ${data.message}`);
+                        if (!salesResponse.ok) {
+                            alert(`Failed to record sales portion of invoice: ${salesData.message}`);
+                            return; // Stop if first transaction fails
                         }
+
+                        // Send VAT Transaction (only if VAT > 0)
+                        if (totalVATAmount > 0) {
+                            const vatResponse = await fetch(`${BASE_URL}/transactions`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${authToken}`
+                                },
+                                body: JSON.stringify(vatTransactionData)
+                            });
+                            const vatData = await vatResponse.json();
+
+                            if (!vatResponse.ok) {
+                                alert(`Failed to record VAT portion of invoice: ${vatData.message}`);
+                                return; // Stop if second transaction fails
+                            }
+                        }
+
+                        alert('Invoice recorded successfully (Net & VAT components)!');
+                        // Store data locally for invoice-display.html
+                        const invoiceDataForDisplay = {
+                            invoiceNumber: invoiceNumber,
+                            invoiceDate: invoiceDate,
+                            customer: customerName,
+                            dueDate: document.getElementById('dueDate').value,
+                            items: [],
+                            netSubtotal: netSubtotal.toFixed(2), // Store the calculated Net Subtotal
+                            taxRate: taxRate.toFixed(2),
+                            totalVATAmount: totalVATAmount.toFixed(2), // Store the calculated VAT Total
+                            grandTotal: grandTotal.toFixed(2) // Store the calculated Grand Total
+                        };
+                         document.querySelectorAll('.item-row').forEach(row => {
+                            invoiceDataForDisplay.items.push({
+                                description: row.querySelector('[id^="itemDesc-"]').value,
+                                quantity: parseFloat(row.querySelector('[id^="itemQty-"]').value),
+                                unitPrice: parseFloat(row.querySelector('[id^="itemPrice-"]').value), // This is the GROSS unit price
+                                total: parseFloat(row.querySelector('.item-calculated-total').textContent) // This is the GROSS item total
+                            });
+                        });
+                        localStorage.setItem('currentInvoiceData', JSON.stringify(invoiceDataForDisplay));
+
+                        window.open('invoice-display.html', '_blank');
+                        form.reset();
+                        initializeInvoiceForm();
                     } catch (error) {
                         alert('Network error while recording invoice. Please check your backend server.');
                         console.error('Invoice recording error:', error);
@@ -345,9 +391,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             // --- IMPORTANT: Simplified Double-Entry for Purchase ---
-            // You MUST ensure an appropriate 'Expense' account (e.g., 'Office Supplies Expense', 'Fuel Expense')
-            // and a 'Cash' or 'Bank' account exist in your backend database and get their IDs.
-            // For this example, we'll use placeholder IDs.
             const CASH_BANK_ACCOUNT_ID = 3; // Example ID for an Asset account
             let EXPENSE_ACCOUNT_ID;          // This should vary based on category
 
@@ -454,9 +497,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         // Calculate dashboard widget values
                         if (trans.transaction_type === 'Sale') {
                             totalRevenue += trans.amount;
-                            // For a real system, you'd check payment status for 'outstanding'
-                            // For now, let's assume all sales are initially outstanding until a 'payment received' transaction
-                            outstandingInvoicesCount++;
+                            outstandingInvoicesCount++; // Simplified: all sales are outstanding for now
                             outstandingInvoicesAmount += trans.amount;
                         } else if (trans.transaction_type === 'Expense') {
                             totalExpenses += trans.amount;
