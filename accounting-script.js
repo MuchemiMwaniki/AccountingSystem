@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const year = today.getFullYear();
             const month = String(today.getMonth() + 1).padStart(2, '0');
             const day = String(today.getDate()).padStart(2, '0');
-            input.value = `${year}-${month}-${day}`;
+            input.value = `${year}-${month}-${day}`;\
         }
     });
 
@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const year = today.getFullYear();
         const month = String(today.getMonth() + 1).padStart(2, '0');
         const day = String(today.getDate()).padStart(2, '0');
-        if (invoiceDateInput) invoiceDateInput.value = `${year}-${month}-${day}`;
+        if (invoiceDateInput) invoiceDateInput.value = `${year}-${month}-${day}`;\
         setDueDate();
     }
 
@@ -186,11 +186,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 <input type="number" id="itemQty-${itemCounter}" value="1" min="1" required>
             </div>
             <div class="form-group item-price">
-                <label for="itemPrice-${itemCounter}">Unit Price (Inc. VAT):</label> <!-- Updated label -->
+                <label for="itemPrice-${itemCounter}">Unit Price (Inc. VAT):</label>
                 <input type="number" id="itemPrice-${itemCounter}" step="0.01" value="0.00" required>
             </div>
             <div class="form-group item-total">
-                <label>Total (Inc. VAT):</label> <!-- Updated label -->
+                <label>Total (Inc. VAT):</label>
                 <span class="item-calculated-total">0.00</span>
             </div>
             <button type="button" class="remove-item-btn"><i class="fas fa-times"></i></button>
@@ -232,32 +232,35 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 const form = document.getElementById('invoice-form');
                 let isValid = true;
+                const invoiceItems = []; // Array to store item details for backend
                 document.querySelectorAll('.item-row').forEach(row => {
                     const desc = row.querySelector('[id^="itemDesc-"]').value.trim();
                     const qty = parseFloat(row.querySelector('[id^="itemQty-"]').value);
                     const price = parseFloat(row.querySelector('[id^="itemPrice-"]').value); // This is gross price
+                    const itemTotal = parseFloat(row.querySelector('.item-calculated-total').textContent); // This is gross item total
 
                     if (!desc || isNaN(qty) || qty <= 0 || isNaN(price) || price < 0) {
                         isValid = false;
                         alert('Please fill in all invoice item details correctly (description, quantity > 0, price >= 0).');
                         return;
                     }
+                    invoiceItems.push({ description: desc, quantity: qty, unitPrice: price, total: itemTotal });
                 });
 
                 if (isValid) {
                     const invoiceNumber = document.getElementById('invoiceNumber').value;
                     const invoiceDate = document.getElementById('invoiceDate').value;
                     const customerName = document.getElementById('customer').value;
+                    const dueDate = document.getElementById('dueDate').value; // Get due date
                     const grandTotal = parseFloat(grandTotalSpan.textContent.replace(' KES', '')); // This is the total GROSS amount
                     const netSubtotal = parseFloat(subtotalSpan.textContent); // This is the calculated NET subtotal
                     const totalVATAmount = parseFloat(totalTaxSpan.textContent); // This is the calculated VAT total
                     const taxRate = parseFloat(taxRateInput.value);
 
                     // Placeholder Account IDs (replace with actual IDs from your backend)
-                    // You would need to create these accounts via your backend's /api/accounts endpoint first.
-                    const ACCOUNTS_RECEIVABLE_ID = 9; // Example ID for an Asset account
-                    const SALES_REVENUE_ID = 10;       // Example ID for a Revenue account
-                    const VAT_PAYABLE_ID = 13;        // NEW: Example ID for a Liability account (VAT Payable)
+                    const ACCOUNTS_RECEIVABLE_ID = 1; // Example ID for an Asset account
+                    const SALES_REVENUE_ID = 2;       // Example ID for a Revenue account
+                    const VAT_PAYABLE_ID = 10;        // Example ID for a Liability account (VAT Payable)
 
                     if (!ACCOUNTS_RECEIVABLE_ID || !SALES_REVENUE_ID || !VAT_PAYABLE_ID) {
                         alert('Error: Please ensure Accounts Receivable, Sales Revenue, AND VAT Payable accounts are set up in your backend and their IDs are correctly configured in the frontend script.');
@@ -271,6 +274,18 @@ document.addEventListener('DOMContentLoaded', function() {
                         return;
                     }
 
+                    // Prepare common invoice data to be stored with the transaction
+                    const commonInvoiceData = {
+                        invoice_number: invoiceNumber,
+                        customer_name: customerName,
+                        due_date: dueDate,
+                        items_json: JSON.stringify(invoiceItems), // Store items as JSON string
+                        tax_rate: taxRate,
+                        net_subtotal: netSubtotal,
+                        total_vat_amount: totalVATAmount,
+                        grand_total: grandTotal
+                    };
+
                     // --- Send two transactions to backend for double-entry ---
                     // 1. Record the Sale (Net Amount)
                     const salesTransactionData = {
@@ -279,7 +294,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         debit_account_id: ACCOUNTS_RECEIVABLE_ID,
                         credit_account_id: SALES_REVENUE_ID,
                         transaction_type: 'Sale',
-                        date: invoiceDate
+                        date: invoiceDate,
+                        ...commonInvoiceData // Include all invoice details
                     };
 
                     // 2. Record the VAT component (if any)
@@ -289,10 +305,12 @@ document.addEventListener('DOMContentLoaded', function() {
                         debit_account_id: ACCOUNTS_RECEIVABLE_ID, // Customer owes this VAT
                         credit_account_id: VAT_PAYABLE_ID,         // This is a liability to the tax authority
                         transaction_type: 'VAT Collection',
-                        date: invoiceDate
+                        date: invoiceDate,
+                        ...commonInvoiceData // Include all invoice details
                     };
 
                     try {
+                        let salesTransactionId = null;
                         // Send Sales Transaction
                         const salesResponse = await fetch(`${BASE_URL}/transactions`, {
                             method: 'POST',
@@ -304,7 +322,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         });
                         const salesData = await salesResponse.json();
 
-                        if (!salesResponse.ok) {
+                        if (salesResponse.ok) {
+                            salesTransactionId = salesData.transaction_id; // Get the ID of the created sales transaction
+                        } else {
                             alert(`Failed to record sales portion of invoice: ${salesData.message}`);
                             return; // Stop if first transaction fails
                         }
@@ -323,34 +343,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
                             if (!vatResponse.ok) {
                                 alert(`Failed to record VAT portion of invoice: ${vatData.message}`);
+                                // Consider rolling back the sales transaction here if VAT fails
                                 return; // Stop if second transaction fails
                             }
                         }
 
                         alert('Invoice recorded successfully (Net & VAT components)!');
-                        // Store data locally for invoice-display.html
-                        const invoiceDataForDisplay = {
-                            invoiceNumber: invoiceNumber,
-                            invoiceDate: invoiceDate,
-                            customer: customerName,
-                            dueDate: document.getElementById('dueDate').value,
-                            items: [],
-                            netSubtotal: netSubtotal.toFixed(2), // Store the calculated Net Subtotal
-                            taxRate: taxRate.toFixed(2),
-                            totalVATAmount: totalVATAmount.toFixed(2), // Store the calculated VAT Total
-                            grandTotal: grandTotal.toFixed(2) // Store the calculated Grand Total
-                        };
-                         document.querySelectorAll('.item-row').forEach(row => {
-                            invoiceDataForDisplay.items.push({
-                                description: row.querySelector('[id^="itemDesc-"]').value,
-                                quantity: parseFloat(row.querySelector('[id^="itemQty-"]').value),
-                                unitPrice: parseFloat(row.querySelector('[id^="itemPrice-"]').value), // This is the GROSS unit price
-                                total: parseFloat(row.querySelector('.item-calculated-total').textContent) // This is the GROSS item total
-                            });
-                        });
-                        localStorage.setItem('currentInvoiceData', JSON.stringify(invoiceDataForDisplay));
-
-                        window.open('invoice-display.html', '_blank');
+                        // Redirect to invoice display page using the ID of the sales transaction
+                        if (salesTransactionId) {
+                            window.open(`invoice-display.html?id=${salesTransactionId}`, '_blank');
+                        } else {
+                            // Fallback if salesTransactionId is somehow null (shouldn't happen with salesResponse.ok check)
+                            window.open('invoice-display.html', '_blank');
+                        }
                         form.reset();
                         initializeInvoiceForm();
                     } catch (error) {
@@ -396,9 +401,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Map category to a specific expense account ID (you'd need to create these in backend)
             switch(category) {
-                case 'office-supplies': EXPENSE_ACCOUNT_ID = 10; break; // Example ID for Office Supplies Expense
-                case 'fuel': EXPENSE_ACCOUNT_ID = 11; break;          // Example ID for Fuel Expense
-                case 'rent': EXPENSE_ACCOUNT_ID = 12; break;          // Example ID for Rent Expense
+                case 'office-supplies': EXPENSE_ACCOUNT_ID = 4; break; // Example ID for Office Supplies Expense
+                case 'fuel': EXPENSE_ACCOUNT_ID = 5; break;          // Example ID for Fuel Expense
+                case 'rent': EXPENSE_ACCOUNT_ID = 6; break;          // Example ID for Rent Expense
                 case 'utilities': EXPENSE_ACCOUNT_ID = 7; break;     // Example ID for Utilities Expense
                 case 'marketing': EXPENSE_ACCOUNT_ID = 8; break;     // Example ID for Marketing Expense
                 default: EXPENSE_ACCOUNT_ID = 9; break;              // Example ID for Other Expenses
@@ -491,6 +496,10 @@ document.addEventListener('DOMContentLoaded', function() {
                             <td>${trans.description}</td>
                             <td class="${amountClass}">${trans.amount.toFixed(2)}</td>
                             <td class="${statusClass}">Recorded</td>
+                            <td>
+                                ${trans.transaction_type === 'Sale' ?
+                                    `<button class="action-btn view-invoice-btn" data-transaction-id="${trans.id}" title="View/Print Invoice"><i class="fas fa-print"></i></button>` : ''}
+                            </td>
                         `;
                         recentTransactionsTableBody.appendChild(row);
 
@@ -503,6 +512,17 @@ document.addEventListener('DOMContentLoaded', function() {
                             totalExpenses += trans.amount;
                         }
                     });
+
+                    // Add event listeners for view/print buttons
+                    document.querySelectorAll('.view-invoice-btn').forEach(button => {
+                        button.addEventListener('click', function() {
+                            const transactionId = this.dataset.transactionId;
+                            if (transactionId) {
+                                window.open(`invoice-display.html?id=${transactionId}`, '_blank');
+                            }
+                        });
+                    });
+
 
                     // Update dashboard widgets
                     if (totalRevenueWidget) totalRevenueWidget.textContent = `$${totalRevenue.toFixed(2)}`;
