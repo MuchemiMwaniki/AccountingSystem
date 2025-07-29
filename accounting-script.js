@@ -101,7 +101,7 @@ document.addEventListener('DOMContentLoaded', function() {
         addInvoiceItemRow();
 
         if (subtotalSpan) subtotalSpan.textContent = '0.00';
-        if (taxRateInput) taxRateInput.value = '0';
+        if (taxRateInput) taxRateInput.value = '16'; // Changed default value to 16
         if (totalTaxSpan) totalTaxSpan.textContent = '0.00';
         if (grandTotalSpan) grandTotalSpan.textContent = '0.00 KES';
 
@@ -239,15 +239,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     const customerName = document.getElementById('customer').value;
                     const grandTotal = parseFloat(grandTotalSpan.textContent.replace(' KES', ''));
 
-                    // --- IMPORTANT: Simplified Double-Entry for Invoice ---
-                    // For a full accounting system, you would typically have a dedicated
-                    // backend endpoint (e.g., POST /api/invoices) that handles the
-                    // complex double-entry (e.g., Debit Accounts Receivable, Credit Sales Revenue, Credit Sales Tax Payable).
-                    // Here, we're creating a single 'Sale' transaction.
-                    // You MUST ensure 'Accounts Receivable' and 'Sales Revenue' accounts exist in your backend database
-                    // and get their IDs. For this example, we'll use placeholder IDs (e.g., 1 and 2).
-                    // In a real app, you'd fetch account IDs dynamically or map via names.
-
                     // Placeholder Account IDs (replace with actual IDs from your backend)
                     // You would need to create these accounts via your backend's /api/accounts endpoint first.
                     const ACCOUNTS_RECEIVABLE_ID = 1; // Example ID for an Asset account
@@ -271,7 +262,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         debit_account_id: ACCOUNTS_RECEIVABLE_ID,
                         credit_account_id: SALES_REVENUE_ID,
                         transaction_type: 'Sale',
-                        date: invoiceDate // Use the invoice date for the transaction
+                        date: invoiceDate
                     };
 
                     try {
@@ -294,7 +285,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 invoiceDate: invoiceDate,
                                 customer: customerName,
                                 dueDate: document.getElementById('dueDate').value,
-                                items: [], // You'd need to fetch these from backend if not storing in localStorage
+                                items: [],
                                 subtotal: subtotalSpan.textContent,
                                 taxRate: taxRateInput.value,
                                 totalTax: totalTaxSpan.textContent,
@@ -313,7 +304,6 @@ document.addEventListener('DOMContentLoaded', function() {
                             window.open('invoice-display.html', '_blank');
                             form.reset();
                             initializeInvoiceForm();
-                            // Ideally, you'd refresh dashboard data here if on dashboard
                         } else {
                             alert(`Failed to record invoice: ${data.message}`);
                         }
@@ -358,7 +348,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // You MUST ensure an appropriate 'Expense' account (e.g., 'Office Supplies Expense', 'Fuel Expense')
             // and a 'Cash' or 'Bank' account exist in your backend database and get their IDs.
             // For this example, we'll use placeholder IDs.
-            const CASH_BANK_ACCOUNT_ID = 3; // Example ID for an Asset account (Cash/Bank)
+            const CASH_BANK_ACCOUNT_ID = 3; // Example ID for an Asset account
             let EXPENSE_ACCOUNT_ID;          // This should vary based on category
 
             // Map category to a specific expense account ID (you'd need to create these in backend)
@@ -407,7 +397,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (response.ok) {
                     alert('Purchase recorded successfully!');
                     purchaseForm.reset();
-                    // Ideally, you'd refresh dashboard data here if on dashboard
                 } else {
                     alert(`Failed to record purchase: ${data.message}`);
                 }
@@ -420,13 +409,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // --- Dashboard Data Fetching (Backend Integration) ---
     const recentTransactionsTableBody = document.querySelector('.recent-activity table tbody');
-    const currentCashBalanceWidget = document.querySelector('.widget-content .widget-value'); // Assuming this is for cash balance
+    const totalRevenueWidget = document.querySelector('.dashboard-widgets .widget:nth-child(1) .widget-value');
+    const totalExpensesWidget = document.querySelector('.dashboard-widgets .widget:nth-child(2) .widget-value');
+    const currentCashBalanceWidget = document.querySelector('.dashboard-widgets .widget:nth-child(3) .widget-value');
+    const outstandingInvoicesWidget = document.querySelector('.dashboard-widgets .widget:nth-child(4) .widget-value');
+
 
     if (recentTransactionsTableBody && currentCashBalanceWidget) { // Only run if on dashboard page
         async function fetchDashboardData() {
             const authToken = localStorage.getItem('authToken');
             if (!authToken) {
-                // Handled by initial auth check, but good to have here too
                 return;
             }
 
@@ -440,11 +432,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 if (transactionsResponse.ok) {
                     recentTransactionsTableBody.innerHTML = ''; // Clear existing rows
-                    transactionsData.slice(0, 5).forEach(trans => { // Displaying top 5 recent transactions
+                    let totalRevenue = 0;
+                    let totalExpenses = 0;
+                    let outstandingInvoicesCount = 0;
+                    let outstandingInvoicesAmount = 0;
+
+                    transactionsData.forEach(trans => {
                         const row = document.createElement('tr');
                         const amountClass = trans.transaction_type === 'Sale' ? 'amount-in' : 'amount-out';
                         const statusClass = trans.transaction_type === 'Sale' ? 'status-paid' : 'status-completed'; // Simplified status
-                        
+
                         row.innerHTML = `
                             <td>${trans.date.split('T')[0]}</td>
                             <td class="type-${trans.transaction_type.toLowerCase()}">${trans.transaction_type}</td>
@@ -453,7 +450,24 @@ document.addEventListener('DOMContentLoaded', function() {
                             <td class="${statusClass}">Recorded</td>
                         `;
                         recentTransactionsTableBody.appendChild(row);
+
+                        // Calculate dashboard widget values
+                        if (trans.transaction_type === 'Sale') {
+                            totalRevenue += trans.amount;
+                            // For a real system, you'd check payment status for 'outstanding'
+                            // For now, let's assume all sales are initially outstanding until a 'payment received' transaction
+                            outstandingInvoicesCount++;
+                            outstandingInvoicesAmount += trans.amount;
+                        } else if (trans.transaction_type === 'Expense') {
+                            totalExpenses += trans.amount;
+                        }
                     });
+
+                    // Update dashboard widgets
+                    if (totalRevenueWidget) totalRevenueWidget.textContent = `$${totalRevenue.toFixed(2)}`;
+                    if (totalExpensesWidget) totalExpensesWidget.textContent = `$${totalExpenses.toFixed(2)}`;
+                    if (outstandingInvoicesWidget) outstandingInvoicesWidget.textContent = `${outstandingInvoicesCount} ($${outstandingInvoicesAmount.toFixed(2)})`;
+
                 } else {
                     console.error('Failed to fetch transactions:', transactionsData.message);
                 }
@@ -466,10 +480,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 const accountsData = await accountsResponse.json();
 
                 if (accountsResponse.ok) {
-                    // Find a 'Cash' or 'Bank' account and display its balance
-                    const cashAccount = accountsData.find(acc => acc.name === 'Cash' || acc.name === 'Bank Account'); // Adjust name as per your backend
+                    const cashAccount = accountsData.find(acc => acc.name === 'Cash' || acc.name === 'Bank Account');
                     if (cashAccount) {
-                        currentCashBalanceWidget.textContent = `$${cashAccount.current_balance.toFixed(2)}`; // Assuming USD for display
+                        currentCashBalanceWidget.textContent = `$${cashAccount.current_balance.toFixed(2)}`;
                     } else {
                         currentCashBalanceWidget.textContent = '$0.00';
                         console.warn('Cash or Bank Account not found. Please create one in your backend.');
@@ -488,22 +501,18 @@ document.addEventListener('DOMContentLoaded', function() {
     // --- Dashboard Currency Selector Logic (from index.html) ---
     const currencySelector = document.getElementById('currency');
     if (currencySelector) {
-        // This selector currently only affects display.
-        // In a real app, it would filter/convert backend data.
         currencySelector.addEventListener('change', function() {
-            // You would re-fetch data or convert displayed values here
             console.log('Currency changed to:', this.value);
-            // Re-call fetchDashboardData() if you implement currency conversion on backend
         });
     }
 
     // --- Logout Functionality ---
-    const logoutBtn = document.getElementById('logout-btn'); // You'll add this button in index.html
+    const logoutBtn = document.getElementById('logout-btn');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', function() {
             localStorage.removeItem('authToken');
             localStorage.removeItem('username');
-            window.location.href = 'auth.html'; // Redirect to login page
+            window.location.href = 'auth.html';
         });
     }
 });
