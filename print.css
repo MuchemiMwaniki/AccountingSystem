@@ -99,30 +99,56 @@
         margin: 2px 0 !important; /* Reduce line spacing */
     }
 
-    /* Table specific adjustments for print */
+    /* --- Invoice Table Specific Adjustments for STACKED Print Layout --- */
     .invoice-table {
         width: 100% !important;
         border-collapse: collapse !important;
         margin-bottom: 20px !important; /* Adjust margin */
         font-size: 0.85em !important; /* Adjust font size */
+        display: block !important; /* Make the table itself behave as a block */
     }
-    .invoice-table th, .invoice-table td {
-        border: 1px solid #ccc !important; /* Clearer borders for print */
-        padding: 6px 8px !important; /* Adjust padding for print */
-        text-align: left !important;
+
+    .invoice-table thead {
+        display: none !important; /* Hide the table header on print when stacking cells */
     }
-    .invoice-table th {
-        background-color: #f0f0f0 !important; /* Light background for headers */
-        color: #000 !important;
+
+    .invoice-table tbody {
+        display: block !important; /* Make tbody behave as a block */
     }
+
+    .invoice-table tr {
+        display: block !important; /* Make each row behave as a block */
+        margin-bottom: 10px !important; /* Add space between stacked rows */
+        border: 1px solid #ccc !important; /* Add a border around each logical row */
+        border-radius: 4px !important; /* Slightly rounded corners */
+        padding: 8px !important; /* Padding within each row block */
+        box-shadow: none !important; /* No shadows for print */
+    }
+
     .invoice-table td {
-        background-color: #fff !important;
-        color: #000 !important;
+        display: block !important; /* Make each cell behave as a block */
+        width: 100% !important; /* Each cell takes full width of its row block */
+        text-align: right !important; /* Align the value to the right */
+        padding-left: 45% !important; /* Space for the pseudo-element label */
+        position: relative !important; /* Needed for absolute positioning of ::before */
+        border: none !important; /* Remove individual cell borders */
+        padding-top: 2px !important; /* Adjust vertical padding */
+        padding-bottom: 2px !important;
     }
-    .invoice-table tfoot td {
+
+    .invoice-table td::before {
+        content: attr(data-label) !important; /* Display the data-label as a prefix */
+        position: absolute !important;
+        left: 8px !important; /* Position the label on the left */
+        width: calc(45% - 16px) !important; /* Width for the label */
+        padding-right: 8px !important;
+        white-space: nowrap !important; /* Prevent label from wrapping */
+        text-align: left !important; /* Align label to the left */
         font-weight: bold !important;
-        text-align: right !important;
+        color: #555 !important; /* Darker color for labels */
     }
+    /* --- End Invoice Table Specific Adjustments --- */
+
 
     /* Invoice Summary adjustments */
     .invoice-summary {
