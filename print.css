@@ -11,9 +11,7 @@
         margin: 0; /* Remove body margin for full control */
         padding: 0;
         box-sizing: border-box; /* Include padding in width/height */
-        /* Default to A4, can be overridden by @page rule below */
-        width: 210mm;
-        min-height: 297mm;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Ensure consistent font */
     }
 
     /* Hide elements that should never print */
@@ -38,18 +36,18 @@
 
     /* Ensure the main content area for invoice display is visible and takes full width */
     .main-content {
-        display: block !important; /* Ensure it's not hidden by a general rule */
-        padding: 0 !important; /* Remove padding */
+        display: block !important;
+        padding: 0 !important;
         margin: 0 !important;
-        width: 100% !important; /* Full width */
-        max-width: none !important; /* Override any max-width */
+        width: 100% !important;
+        max-width: none !important;
     }
 
     /* Specific adjustments for the invoice-container to ensure it prints well */
     .invoice-container {
-        display: block !important; /* Ensure it's not hidden */
-        box-shadow: none !important; /* Remove shadows for print */
-        border: none !important; /* Remove borders */
+        display: block !important;
+        box-shadow: none !important;
+        border: none !important;
         margin: 0 auto !important; /* Center on page, but remove external margins */
         padding: 15mm 15mm !important; /* Adjust padding for print margins */
         min-height: auto !important; /* Let content define height */
@@ -59,97 +57,92 @@
 
     /* Header adjustments for print */
     .invoice-header {
-        display: flex !important; /* Ensure flex layout */
-        flex-direction: row !important; /* Keep logo and company info side-by-side */
+        display: flex !important;
+        flex-direction: row !important;
         justify-content: space-between !important;
         align-items: flex-start !important;
-        margin-bottom: 20px !important; /* Reduce margin */
+        margin-bottom: 20px !important;
     }
     .invoice-header .company-info {
         text-align: right !important;
         margin-top: 0 !important;
     }
     .invoice-header .logo {
-        max-width: 120px !important; /* Adjust logo size for print */
+        max-width: 120px !important;
         height: auto !important;
     }
     .invoice-header h1 {
-        font-size: 1.5em !important; /* Adjust font size */
+        font-size: 1.5em !important;
     }
     .invoice-header p {
-        font-size: 0.8em !important; /* Adjust font size */
+        font-size: 0.8em !important;
     }
 
     /* Invoice details and bill-to section */
     .invoice-details, .bill-to-section {
         display: flex !important;
-        flex-direction: row !important; /* Keep side-by-side */
+        flex-direction: row !important;
         justify-content: space-between !important;
-        margin-bottom: 15px !important; /* Adjust margin */
-        font-size: 0.9em !important; /* Adjust font size */
+        margin-bottom: 15px !important;
+        font-size: 0.9em !important;
     }
     .invoice-details div, .bill-to-section div {
-        width: 48% !important; /* Maintain two columns */
+        width: 48% !important;
         margin-bottom: 0 !important;
     }
     .invoice-details h4, .bill-to-section h4 {
-        font-size: 1em !important; /* Adjust font size */
+        font-size: 1em !important;
         margin-bottom: 5px !important;
     }
     .invoice-details p, .bill-to-section p {
-        margin: 2px 0 !important; /* Reduce line spacing */
+        margin: 2px 0 !important;
     }
 
-    /* --- Invoice Table Specific Adjustments for STACKED Print Layout --- */
+    /* --- Invoice Table Specific Adjustments for STANDARD Print Layout --- */
     .invoice-table {
         width: 100% !important;
         border-collapse: collapse !important;
-        margin-bottom: 20px !important; /* Adjust margin */
-        font-size: 0.8em !important; /* Slightly smaller font for table content */
-        display: block !important; /* Make the table itself behave as a block */
+        margin-bottom: 20px !important;
+        font-size: 0.85em !important; /* Adjusted font size for table content */
+        display: table !important; /* Ensure it behaves as a table */
     }
 
     .invoice-table thead {
-        display: none !important; /* Hide the table header on print when stacking cells */
+        display: table-header-group !important; /* Show table header */
     }
 
     .invoice-table tbody {
-        display: block !important; /* Make tbody behave as a block */
+        display: table-row-group !important; /* Show table body */
     }
 
     .invoice-table tr {
-        display: block !important; /* Make each row behave as a block */
-        margin-bottom: 10px !important; /* Add space between stacked rows */
-        border: 1px solid #ccc !important; /* Add a border around each logical row */
-        border-radius: 4px !important; /* Slightly rounded corners */
-        padding: 8px !important; /* Padding within each row block */
-        box-shadow: none !important; /* No shadows for print */
+        display: table-row !important; /* Each row behaves as a table row */
+        margin-bottom: 0 !important; /* Remove margin between rows */
+        border: none !important; /* No individual row borders */
+        box-shadow: none !important;
+        padding: 0 !important;
         page-break-inside: avoid !important; /* Try to keep rows from breaking across pages */
     }
 
-    .invoice-table td {
-        display: block !important; /* Make each cell behave as a block */
-        width: 100% !important; /* Each cell takes full width of its row block */
-        text-align: right !important; /* Align the value to the right */
-        padding-left: 50% !important; /* Increased space for the pseudo-element label */
-        position: relative !important; /* Needed for absolute positioning of ::before */
-        border: none !important; /* Remove individual cell borders */
-        padding-top: 2px !important; /* Adjust vertical padding */
-        padding-bottom: 2px !important;
+    .invoice-table th, .invoice-table td {
+        display: table-cell !important; /* Each cell behaves as a table cell */
+        padding: 6px 8px !important; /* Adjust padding for print */
+        border: 1px solid #ccc !important; /* Clearer borders for print */
+        text-align: left !important; /* Default to left align */
+        position: static !important; /* Remove relative positioning */
+        padding-left: 8px !important; /* Reset padding-left */
         word-wrap: break-word !important; /* Force long words to break */
         overflow-wrap: break-word !important; /* Ensure content wraps */
     }
 
+    .invoice-table th {
+        background-color: #f0f0f0 !important; /* Light background for headers */
+        color: #000 !important;
+        font-weight: bold !important; /* Ensure headers are bold */
+    }
+
     .invoice-table td::before {
-        content: attr(data-label) !important; /* Display the data-label as a prefix */
-        position: absolute !important;
-        left: 8px !important; /* Position the label on the left */
-        width: calc(50% - 16px) !important; /* Adjusted width for the label */
-        padding-right: 8px !important;
-        white-space: normal !important; /* Allow label to wrap if needed */
-        text-align: left !important; /* Align label to the left */
-        font-weight: bold !important;
-        color: #555 !important; /* Darker color for labels */
+        content: none !important; /* Hide the data-label pseudo-element for standard table print */
     }
     /* --- End Invoice Table Specific Adjustments --- */
 
@@ -158,40 +151,40 @@
     .invoice-summary {
         display: flex !important;
         justify-content: flex-end !important;
-        margin-bottom: 20px !important; /* Adjust margin */
+        margin-bottom: 20px !important;
     }
     .invoice-summary .summary-details {
         width: 100% !important;
-        max-width: 250px !important; /* Constrain summary width for print */
+        max-width: 250px !important;
         border: 1px solid #ddd !important;
-        border-radius: 0 !important; /* Remove rounded corners for print */
+        border-radius: 0 !important;
         padding: 10px !important;
-        background-color: #f9f9f9 !important; /* Light background for summary */
+        background-color: #f9f9f9 !important;
         box-shadow: none !important;
     }
     .invoice-summary .summary-row {
         padding: 5px 0 !important;
-        border-bottom: 1px dashed #e0e0e0 !important; /* Lighter dashed border */
+        border-bottom: 1px dashed #e0e0e0 !important;
     }
     .invoice-summary .summary-row.total {
         font-size: 1.1em !important;
         padding-top: 10px !important;
         margin-top: 5px !important;
-        border-top: 2px solid #000 !important; /* Stronger border for total */
+        border-top: 2px solid #000 !important;
     }
     .invoice-summary .summary-row span:first-child {
-        color: #000 !important; /* Ensure black text */
+        color: #000 !important;
     }
     .invoice-summary .summary-row span:last-child {
-        color: #000 !important; /* Ensure black text */
+        color: #000 !important;
     }
 
     /* Payment terms adjustments */
     .payment-terms {
-        margin-top: 20px !important; /* Adjust margin */
-        font-size: 0.85em !important; /* Adjust font size */
-        line-height: 1.4 !important; /* Adjust line height */
-        color: #000 !important; /* Black text */
+        margin-top: 20px !important;
+        font-size: 0.85em !important;
+        line-height: 1.4 !important;
+        color: #000 !important;
     }
     .payment-terms h4 {
         margin-bottom: 5px !important;
@@ -199,7 +192,7 @@
 
     /* --- Page Break Control --- */
     .page-break {
-        page-break-after: always !important; /* Forces a page break after this element */
+        page-break-after: always !important;
     }
 
     /* Remove browser default headers/footers (URLs, page numbers) */
