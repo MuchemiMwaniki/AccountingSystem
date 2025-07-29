@@ -25,14 +25,11 @@ document.addEventListener('DOMContentLoaded', function() {
             itemsTableBody.appendChild(row);
         });
 
-        // Populate summary details
-        document.getElementById('display-subtotal').textContent = invoiceData.subtotal;
+        // Populate summary details with new keys
+        document.getElementById('display-subtotal').textContent = invoiceData.netSubtotal; // Now displays Net Subtotal
         document.getElementById('display-tax-rate').textContent = invoiceData.taxRate;
-        document.getElementById('display-total-tax').textContent = invoiceData.totalTax;
+        document.getElementById('display-total-tax').textContent = invoiceData.totalVATAmount; // Now displays VAT Total
         document.getElementById('display-grand-total').textContent = invoiceData.grandTotal;
-
-        // Clear data from localStorage after populating to avoid displaying old data on next visit
-        // localStorage.removeItem('currentInvoiceData'); // Uncomment if you want data to be single-use
 
         // Add print button functionality
         const printNowBtn = document.getElementById('print-now-btn');
@@ -45,8 +42,6 @@ document.addEventListener('DOMContentLoaded', function() {
     } else {
         // Handle case where no invoice data is found (e.g., direct access to invoice-display.html)
         alert('No invoice data found. Please create an invoice first.');
-        // Optionally redirect back to the invoice form
-        window.close(); // Close the tab if it was opened
-        // window.location.href = 'invoice-form.html'; // Or redirect to the form
+        window.close();
     }
 });
