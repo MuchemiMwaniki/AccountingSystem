@@ -183,9 +183,33 @@
                 margin-top: 20px;
             }
         }
+
+        /* Styles for the paper size selector */
+        .paper-size-selector {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-radius: 8px;
+            display: inline-block; /* To contain its width */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .paper-size-selector label {
+            font-weight: bold;
+            margin-right: 10px;
+            color: #333;
+        }
+        .paper-size-selector select {
+            padding: 8px 12px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            background-color: #fff;
+            cursor: pointer;
+            font-size: 0.95em;
+        }
     </style>
 </head>
-<body>
+<body data-paper-size="a4"> <!-- Default paper size -->
     <div class="invoice-container">
         <div class="invoice-header">
             <img src="favicon.png" alt="Company Logo" class="logo">
@@ -255,6 +279,13 @@
     </div>
 
     <div class="print-actions">
+        <div class="paper-size-selector">
+            <label for="paperSize">Paper Size:</label>
+            <select id="paperSize">
+                <option value="a4">A4 (210mm x 297mm)</option>
+                <option value="letter">Letter (8.5in x 11in)</option>
+            </select>
+        </div>
         <button id="print-now-btn"><i class="fas fa-print"></i> Print Invoice</button>
     </div>
 
