@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const totalTaxSpan = document.getElementById('totalTax'); // This will now be VAT Total
     const grandTotalSpan = document.getElementById('grandTotal');
     const saveInvoiceBtn = document.getElementById('save-invoice-btn');
-    const resetInvoiceBtn = document.getElementById('reset-invoice-btn');
+    const resetInvoiceBtn = document.querySelector('.reset-invoice-btn'); // Corrected selector
     const customerSuggestionsDatalist = document.getElementById('customer-suggestions');
     const productSuggestionsDatalist = document.getElementById('product-suggestions');
 
@@ -258,9 +258,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     const taxRate = parseFloat(taxRateInput.value);
 
                     // IMPORTANT: Updated Account IDs based on your provided list
-                    const ACCOUNTS_RECEIVABLE_ID = 7; // From your list: "Accounts Receivable", "id": 7
-                    const SALES_REVENUE_ID = 8;       // From your list: "Sales Revenue", "id": 8
-                    const VAT_PAYABLE_ID = 13;        // From your list: "VAT Payable", "id": 13
+                    const ACCOUNTS_RECEIVABLE_ID = 1; // From your list: "Accounts Receivable", "id": 7
+                    const SALES_REVENUE_ID =2;       // From your list: "Sales Revenue", "id": 8
+                    const VAT_PAYABLE_ID = 3;        // From your list: "VAT Payable", "id": 13
 
                     if (!ACCOUNTS_RECEIVABLE_ID || !SALES_REVENUE_ID || !VAT_PAYABLE_ID) {
                         alert('Error: Please ensure Accounts Receivable, Sales Revenue, AND VAT Payable accounts are set up in your backend and their IDs are correctly configured in the frontend script.');
@@ -397,14 +397,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // --- IMPORTANT: Simplified Double-Entry for Purchase ---
             // Updated Account IDs based on your provided list
-            const CASH_BANK_ACCOUNT_ID = 9; // From your list: "Cash", "id": 9
+            const CASH_BANK_ACCOUNT_ID = 4; // From your list: "Cash", "id": 9
             let EXPENSE_ACCOUNT_ID;          // This should vary based on category
 
             // Map category to a specific expense account ID (you'd need to create these in backend)
             switch(category) {
-                case 'office-supplies': EXPENSE_ACCOUNT_ID = 10; break; // From your list: "Office Supplies Expense", "id": 10
-                case 'fuel': EXPENSE_ACCOUNT_ID = 11; break;          // From your list: "Fuel Expense", "id": 11
-                case 'rent': EXPENSE_ACCOUNT_ID = 12; break;          // From your list: "Rent Expense", "id": 12
+                case 'office-supplies': EXPENSE_ACCOUNT_ID = 5; break; // From your list: "Office Supplies Expense", "id": 10
+                case 'fuel': EXPENSE_ACCOUNT_ID = 6; break;          // From your list: "Fuel Expense", "id": 11
+                case 'rent': EXPENSE_ACCOUNT_ID =7; break;          // From your list: "Rent Expense", "id": 12
                 // Add more cases here if you create other specific expense accounts
                 // For example:
                 // case 'utilities': EXPENSE_ACCOUNT_ID = YOUR_UTILITIES_ID; break;
@@ -545,9 +545,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 const accountsData = await accountsResponse.json();
 
                 if (accountsResponse.ok) {
-                    const cashAccount = accountsData.find(acc => acc.name === 'Cash' || acc.name === 'Bank Account'); // Adjust name as per your backend
+                    const cashAccount = accountsData.find(acc => acc.name === 'Cash' || acc.name === 'Bank Account');
                     if (cashAccount) {
-                        currentCashBalanceWidget.textContent = `$${cashAccount.current_balance.toFixed(2)}`; // Assuming USD for display
+                        currentCashBalanceWidget.textContent = `$${cashAccount.current_balance.toFixed(2)}`;
                     } else {
                         currentCashBalanceWidget.textContent = '$0.00';
                         console.warn('Cash or Bank Account not found. Please create one in your backend.');
@@ -566,22 +566,18 @@ document.addEventListener('DOMContentLoaded', function() {
     // --- Dashboard Currency Selector Logic (from index.html) ---
     const currencySelector = document.getElementById('currency');
     if (currencySelector) {
-        // This selector currently only affects display.
-        // In a real app, it would filter/convert backend data.
         currencySelector.addEventListener('change', function() {
-            // You would re-fetch data or convert displayed values here
             console.log('Currency changed to:', this.value);
-            // Re-call fetchDashboardData() if you implement currency conversion on backend
         });
     }
 
     // --- Logout Functionality ---
-    const logoutBtn = document.getElementById('logout-btn'); // You'll add this button in index.html
+    const logoutBtn = document.getElementById('logout-btn');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', function() {
             localStorage.removeItem('authToken');
             localStorage.removeItem('username');
-            window.location.href = 'auth.html'; // Redirect to login page
+            window.location.href = 'auth.html';
         });
     }
 });
