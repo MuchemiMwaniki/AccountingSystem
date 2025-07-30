@@ -173,7 +173,6 @@
             const username = document.getElementById('registerUsername').value;
             const password = document.getElementById('registerPassword').value;
 
-            console.log('Attempting registration for:', username); // Debugging
             try {
                 const response = await fetch(`${BASE_URL}/register`, {
                     method: 'POST',
@@ -184,7 +183,6 @@
                 });
 
                 const data = await response.json();
-                console.log('Registration response:', data); // Debugging
 
                 if (response.ok) {
                     showMessage('Registration successful! Please log in.', 'success');
@@ -208,7 +206,6 @@
             const username = document.getElementById('loginUsername').value;
             const password = document.getElementById('loginPassword').value;
 
-            console.log('Attempting login for:', username); // Debugging
             try {
                 const response = await fetch(`${BASE_URL}/login`, {
                     method: 'POST',
@@ -219,12 +216,10 @@
                 });
 
                 const data = await response.json();
-                console.log('Login response:', data); // Debugging
 
                 if (response.ok) {
                     localStorage.setItem('authToken', data.token);
                     localStorage.setItem('username', username); // Store username for display
-                    console.log('Stored in localStorage: authToken =', data.token, ', username =', username); // Debugging
                     showMessage('Login successful! Redirecting...', 'success');
                     window.location.href = 'index.html'; // Redirect to dashboard
                 } else {
@@ -240,7 +235,6 @@
         document.addEventListener('DOMContentLoaded', () => {
             const authToken = localStorage.getItem('authToken');
             const storedUsername = localStorage.getItem('username');
-            console.log('DOMContentLoaded: Checking authentication. authToken:', authToken, 'username:', storedUsername); // Debugging
             if (authToken && storedUsername) {
                 // If token and username exist, assume logged in and redirect to dashboard
                 // In a real app, you'd validate the token with the backend
