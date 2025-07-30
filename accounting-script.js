@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const year = today.getFullYear();
             const month = String(today.getMonth() + 1).padStart(2, '0');
             const day = String(today.getDate()).padStart(2, '0');
-            input.value = `${year}-${month}-${day}`; // Corrected: No trailing backslash
+            input.value = `${year}-${month}-${day}`;
         }
     });
 
@@ -257,10 +257,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     const totalVATAmount = parseFloat(totalTaxSpan.textContent); // This is the calculated VAT total
                     const taxRate = parseFloat(taxRateInput.value);
 
-                    // Placeholder Account IDs (replace with actual IDs from your backend)
-                    const ACCOUNTS_RECEIVABLE_ID = 7; // Example ID for an Asset account
-                    const SALES_REVENUE_ID = 8;       // Example ID for a Revenue account
-                    const VAT_PAYABLE_ID = 13;        // Example ID for a Liability account (VAT Payable)
+                    // IMPORTANT: Updated Account IDs based on your provided list
+                    const ACCOUNTS_RECEIVABLE_ID = 7; // From your list: "Accounts Receivable", "id": 7
+                    const SALES_REVENUE_ID = 8;       // From your list: "Sales Revenue", "id": 8
+                    const VAT_PAYABLE_ID = 13;        // From your list: "VAT Payable", "id": 13
 
                     if (!ACCOUNTS_RECEIVABLE_ID || !SALES_REVENUE_ID || !VAT_PAYABLE_ID) {
                         alert('Error: Please ensure Accounts Receivable, Sales Revenue, AND VAT Payable accounts are set up in your backend and their IDs are correctly configured in the frontend script.');
@@ -396,17 +396,20 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             // --- IMPORTANT: Simplified Double-Entry for Purchase ---
-            const CASH_BANK_ACCOUNT_ID = 9; // Example ID for an Asset account
+            // Updated Account IDs based on your provided list
+            const CASH_BANK_ACCOUNT_ID = 9; // From your list: "Cash", "id": 9
             let EXPENSE_ACCOUNT_ID;          // This should vary based on category
 
             // Map category to a specific expense account ID (you'd need to create these in backend)
             switch(category) {
-                case 'office-supplies': EXPENSE_ACCOUNT_ID = 10; break; // Example ID for Office Supplies Expense
-                case 'fuel': EXPENSE_ACCOUNT_ID = 11; break;          // Example ID for Fuel Expense
-                case 'rent': EXPENSE_ACCOUNT_ID = 12; break;          // Example ID for Rent Expense
-                case 'utilities': EXPENSE_ACCOUNT_ID = 7; break;     // Example ID for Utilities Expense
-                case 'marketing': EXPENSE_ACCOUNT_ID = 8; break;     // Example ID for Marketing Expense
-                default: EXPENSE_ACCOUNT_ID = 9; break;              // Example ID for Other Expenses
+                case 'office-supplies': EXPENSE_ACCOUNT_ID = 10; break; // From your list: "Office Supplies Expense", "id": 10
+                case 'fuel': EXPENSE_ACCOUNT_ID = 11; break;          // From your list: "Fuel Expense", "id": 11
+                case 'rent': EXPENSE_ACCOUNT_ID = 12; break;          // From your list: "Rent Expense", "id": 12
+                // Add more cases here if you create other specific expense accounts
+                // For example:
+                // case 'utilities': EXPENSE_ACCOUNT_ID = YOUR_UTILITIES_ID; break;
+                // case 'marketing': EXPENSE_ACCOUNT_ID = YOUR_MARKETING_ID; break;
+                default: EXPENSE_ACCOUNT_ID = 10; break; // Default to Office Supplies if no specific match
             }
 
             if (!CASH_BANK_ACCOUNT_ID || !EXPENSE_ACCOUNT_ID) {
@@ -445,6 +448,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (response.ok) {
                     alert('Purchase recorded successfully!');
                     purchaseForm.reset();
+                    // Ideally, you'd refresh dashboard data here if on dashboard
                 } else {
                     alert(`Failed to record purchase: ${data.message}`);
                 }
@@ -541,9 +545,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 const accountsData = await accountsResponse.json();
 
                 if (accountsResponse.ok) {
-                    const cashAccount = accountsData.find(acc => acc.name === 'Cash' || acc.name === 'Bank Account');
+                    const cashAccount = accountsData.find(acc => acc.name === 'Cash' || acc.name === 'Bank Account'); // Adjust name as per your backend
                     if (cashAccount) {
-                        currentCashBalanceWidget.textContent = `$${cashAccount.current_balance.toFixed(2)}`;
+                        currentCashBalanceWidget.textContent = `$${cashAccount.current_balance.toFixed(2)}`; // Assuming USD for display
                     } else {
                         currentCashBalanceWidget.textContent = '$0.00';
                         console.warn('Cash or Bank Account not found. Please create one in your backend.');
@@ -562,18 +566,22 @@ document.addEventListener('DOMContentLoaded', function() {
     // --- Dashboard Currency Selector Logic (from index.html) ---
     const currencySelector = document.getElementById('currency');
     if (currencySelector) {
+        // This selector currently only affects display.
+        // In a real app, it would filter/convert backend data.
         currencySelector.addEventListener('change', function() {
+            // You would re-fetch data or convert displayed values here
             console.log('Currency changed to:', this.value);
+            // Re-call fetchDashboardData() if you implement currency conversion on backend
         });
     }
 
     // --- Logout Functionality ---
-    const logoutBtn = document.getElementById('logout-btn');
+    const logoutBtn = document.getElementById('logout-btn'); // You'll add this button in index.html
     if (logoutBtn) {
         logoutBtn.addEventListener('click', function() {
             localStorage.removeItem('authToken');
             localStorage.removeItem('username');
-            window.location.href = 'auth.html';
+            window.location.href = 'auth.html'; // Redirect to login page
         });
     }
 });
