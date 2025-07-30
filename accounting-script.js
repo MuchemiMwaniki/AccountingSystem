@@ -258,9 +258,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     const taxRate = parseFloat(taxRateInput.value);
 
                     // IMPORTANT: Updated Account IDs based on your provided list
-                    const ACCOUNTS_RECEIVABLE_ID = 1; // From your list: "Accounts Receivable", "id": 7
-                    const SALES_REVENUE_ID =2;       // From your list: "Sales Revenue", "id": 8
-                    const VAT_PAYABLE_ID = 3;        // From your list: "VAT Payable", "id": 13
+                    const ACCOUNTS_RECEIVABLE_ID = 1; // From your list: "Accounts Receivable", "id": 1
+                    const SALES_REVENUE_ID = 2;       // From your list: "Sales Revenue", "id": 2
+                    const VAT_PAYABLE_ID = 3;        // From your list: "VAT Payable", "id": 3
 
                     if (!ACCOUNTS_RECEIVABLE_ID || !SALES_REVENUE_ID || !VAT_PAYABLE_ID) {
                         alert('Error: Please ensure Accounts Receivable, Sales Revenue, AND VAT Payable accounts are set up in your backend and their IDs are correctly configured in the frontend script.');
@@ -397,19 +397,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // --- IMPORTANT: Simplified Double-Entry for Purchase ---
             // Updated Account IDs based on your provided list
-            const CASH_BANK_ACCOUNT_ID = 4; // From your list: "Cash", "id": 9
+            const CASH_BANK_ACCOUNT_ID = 4; // From your list: "Cash", "id": 4
             let EXPENSE_ACCOUNT_ID;          // This should vary based on category
 
             // Map category to a specific expense account ID (you'd need to create these in backend)
             switch(category) {
-                case 'office-supplies': EXPENSE_ACCOUNT_ID = 5; break; // From your list: "Office Supplies Expense", "id": 10
-                case 'fuel': EXPENSE_ACCOUNT_ID = 6; break;          // From your list: "Fuel Expense", "id": 11
-                case 'rent': EXPENSE_ACCOUNT_ID =7; break;          // From your list: "Rent Expense", "id": 12
+                case 'office-supplies': EXPENSE_ACCOUNT_ID = 5; break; // From your list: "Office Supplies Expense", "id": 5
+                case 'fuel': EXPENSE_ACCOUNT_ID = 6; break;          // From your list: "Fuel Expense", "id": 6
+                case 'rent': EXPENSE_ACCOUNT_ID = 7; break;          // From your list: "Rent Expense", "id": 7
                 // Add more cases here if you create other specific expense accounts
                 // For example:
                 // case 'utilities': EXPENSE_ACCOUNT_ID = YOUR_UTILITIES_ID; break;
                 // case 'marketing': EXPENSE_ACCOUNT_ID = YOUR_MARKETING_ID; break;
-                default: EXPENSE_ACCOUNT_ID = 10; break; // Default to Office Supplies if no specific match
+                default: EXPENSE_ACCOUNT_ID = 5; break; // Default to Office Supplies if no specific match
             }
 
             if (!CASH_BANK_ACCOUNT_ID || !EXPENSE_ACCOUNT_ID) {
@@ -574,10 +574,4 @@ document.addEventListener('DOMContentLoaded', function() {
     // --- Logout Functionality ---
     const logoutBtn = document.getElementById('logout-btn');
     if (logoutBtn) {
-        logoutBtn.addEventListener('click', function() {
-            localStorage.removeItem('authToken');
-            localStorage.removeItem('username');
-            window.location.href = 'auth.html';
-        });
-    }
-});
+        logoutBtn.addEventListener('click', function(
