@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const year = today.getFullYear();
             const month = String(today.getMonth() + 1).padStart(2, '0');
             const day = String(today.getDate()).padStart(2, '0');
-            input.value = `${year}-${month}-${day}`; // Removed the trailing backslash
+            input.value = `${year}-${month}-${day}`; // Corrected: No trailing backslash
         }
     });
 
