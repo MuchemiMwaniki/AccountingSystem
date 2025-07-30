@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const year = today.getFullYear();
             const month = String(today.getMonth() + 1).padStart(2, '0');
             const day = String(today.getDate()).padStart(2, '0');
-            input.value = `${year}-${month}-${day}`;\
+            input.value = `${year}-${month}-${day}`; // Removed the trailing backslash
         }
     });
 
@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const year = today.getFullYear();
         const month = String(today.getMonth() + 1).padStart(2, '0');
         const day = String(today.getDate()).padStart(2, '0');
-        if (invoiceDateInput) invoiceDateInput.value = `${year}-${month}-${day}`;\
+        if (invoiceDateInput) invoiceDateInput.value = `${year}-${month}-${day}`;
         setDueDate();
     }
 
@@ -516,64 +516,4 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Add event listeners for view/print buttons
                     document.querySelectorAll('.view-invoice-btn').forEach(button => {
                         button.addEventListener('click', function() {
-                            const transactionId = this.dataset.transactionId;
-                            if (transactionId) {
-                                window.open(`invoice-display.html?id=${transactionId}`, '_blank');
-                            }
-                        });
-                    });
-
-
-                    // Update dashboard widgets
-                    if (totalRevenueWidget) totalRevenueWidget.textContent = `$${totalRevenue.toFixed(2)}`;
-                    if (totalExpensesWidget) totalExpensesWidget.textContent = `$${totalExpenses.toFixed(2)}`;
-                    if (outstandingInvoicesWidget) outstandingInvoicesWidget.textContent = `${outstandingInvoicesCount} ($${outstandingInvoicesAmount.toFixed(2)})`;
-
-                } else {
-                    console.error('Failed to fetch transactions:', transactionsData.message);
-                }
-
-                // Fetch Accounts for Cash Balance
-                const accountsResponse = await fetch(`${BASE_URL}/accounts`, {
-                    method: 'GET',
-                    headers: { 'Authorization': `Bearer ${authToken}` }
-                });
-                const accountsData = await accountsResponse.json();
-
-                if (accountsResponse.ok) {
-                    const cashAccount = accountsData.find(acc => acc.name === 'Cash' || acc.name === 'Bank Account');
-                    if (cashAccount) {
-                        currentCashBalanceWidget.textContent = `$${cashAccount.current_balance.toFixed(2)}`;
-                    } else {
-                        currentCashBalanceWidget.textContent = '$0.00';
-                        console.warn('Cash or Bank Account not found. Please create one in your backend.');
-                    }
-                } else {
-                    console.error('Failed to fetch accounts:', accountsData.message);
-                }
-
-            } catch (error) {
-                console.error('Error fetching dashboard data:', error);
-            }
-        }
-        fetchDashboardData();
-    }
-
-    // --- Dashboard Currency Selector Logic (from index.html) ---
-    const currencySelector = document.getElementById('currency');
-    if (currencySelector) {
-        currencySelector.addEventListener('change', function() {
-            console.log('Currency changed to:', this.value);
-        });
-    }
-
-    // --- Logout Functionality ---
-    const logoutBtn = document.getElementById('logout-btn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', function() {
-            localStorage.removeItem('authToken');
-            localStorage.removeItem('username');
-            window.location.href = 'auth.html';
-        });
-    }
-});
+                            const transactionId = this.datas
